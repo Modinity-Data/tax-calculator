@@ -6,7 +6,7 @@
     <title>Modinity Group | Tax Calculator</title>
     <style>
         :root {
-            --primary-color: #000; /* Fashion minimal style */
+            --primary-color: #000; 
             --accent-color: #666;
             --bg-color: #f8f9fa;
             --border-radius: 8px;
@@ -60,7 +60,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
-            box-sizing: border-box; /* Fix padding issues */
+            box-sizing: border-box; 
         }
 
         select:focus, input:focus {
@@ -101,7 +101,7 @@
         }
 
         td {
-            font-family: 'Courier New', monospace; /* Monospace for numbers */
+            font-family: 'Courier New', monospace; 
             font-weight: 600;
             text-align: right;
         }
@@ -118,35 +118,32 @@
             color: #d9534f;
         }
 
-        .btn-action {
-            grid-column: 1 / -1;
-            background-color: #000;
-            color: #fff;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-top: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-action:hover {
-            opacity: 0.9;
-        }
-        
+        /* UPDATED BUTTON STYLE */
         .copy-btn {
-            background-color: #fff;
-            color: #000;
-            border: 1px solid #000;
-            margin-top: 10px;
+            background-color: #000; /* Black background */
+            color: #fff; /* White Text */
+            border: 2px solid #000;
+            margin-top: 20px;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
+            font-weight: 700; /* BOLD */
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Mobile Responsive */
+        .copy-btn:hover {
+            background-color: #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .copy-btn:active {
+            transform: translateY(1px);
+        }
+
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -191,7 +188,7 @@
                 <option value="pph23_gen" selected>PPh 23 - General Services (2%)</option>
                 <option value="pph23_royalty">PPh 23 - Royalty (15%)</option>
                 <option value="pph42_rent">PPh 4(2) Final - Rent Office/Store (10%)</option>
-                <option value="pph21_ind">PPh 21 - Individual / Tenaga Ahli (Progressive)</option>
+                <option value="pph_final_const">WHT Final - Construction & Others (Varied)</option> <option value="pph21_ind">PPh 21 - Individual / Tenaga Ahli (Progressive)</option>
                 <option value="pph26">PPh 26 - Overseas (20%)</option>
                 <option value="manual">Manual Input</option>
             </select>
@@ -205,7 +202,7 @@
 
         <div class="form-group">
             <label>WHT Rate (%)</label>
-            <input type="number" id="whtRate" value="2" step="0.1" oninput="calculate()">
+            <input type="number" id="whtRate" value="2" step="0.01" oninput="calculate()">
             <div class="hint" id="whtRateHint">Standard Rate: 2%</div>
         </div>
 
@@ -245,7 +242,7 @@
         <div id="logicNote" style="margin-top: 15px; font-size: 11px; color: #666; font-style: italic;">
             </div>
 
-        <button class="copy-btn" onclick="copyTable()">Copy Table for Email/PR</button>
+        <button class="copy-btn" onclick="copyTable()">COPY TABLE (FOR PR)</button>
     </div>
 </div>
 
@@ -278,30 +275,40 @@
             rateInput.value = 2;
             baseInput.value = amount;
             hint.innerText = "Fixed Rate: 2%";
+            baseHint.innerText = "Standard: Same as Amount";
         } 
         else if (type === 'pph23_royalty') {
             rateInput.value = 15;
             baseInput.value = amount;
             hint.innerText = "Fixed Rate: 15%";
+            baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph42_rent') {
             rateInput.value = 10;
             baseInput.value = amount;
             hint.innerText = "Final Tax: 10%";
+            baseHint.innerText = "Standard: Same as Amount";
+        }
+        else if (type === 'pph_final_const') {
+            // NEW LOGIC FOR CONSTRUCTION
+            rateInput.value = 1.75; // Default guess
+            rateInput.disabled = false; // User must verify
+            baseInput.value = amount;
+            // Cheat sheet for users
+            hint.innerText = "Common Rates: 1.75% (Small), 2.65% (Med/Large), 4% (No Cert). Check Vendor!";
+            baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph26') {
             rateInput.value = 20;
             baseInput.value = amount;
             hint.innerText = "Overseas: 20%";
+            baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph21_ind') {
             // Special Progressive Logic
-            rateInput.value = 0; // Calculated internally
-            rateInput.disabled = true; // User can't edit rate, it's progressive
-            
-            // Logic: Base is 50% of Amount
+            rateInput.value = 0; 
+            rateInput.disabled = true; 
             baseInput.value = amount * 0.5; 
-            
             hint.innerText = "Progressive Rate (5% - 35%) applied on 50% Base";
             baseHint.innerText = "Auto-calculated: 50% of Amount";
         }
@@ -311,13 +318,13 @@
             rateInput.disabled = true;
             baseInput.disabled = true;
             hint.innerText = "No Deduction";
+            baseHint.innerText = "-";
         }
 
         calculate();
     }
 
     function calculatePPh21Progressive(taxBase50) {
-        // Progressive Layers based on Indonesian Tax Law (UU HPP)
         // Layer 1: 0 - 60 Juta (5%)
         // Layer 2: 60 - 250 Juta (15%)
         // Layer 3: 250 - 500 Juta (25%)
@@ -336,21 +343,21 @@
 
         // Layer 2
         if (remaining > 0) {
-            let layer2 = Math.min(remaining, 190000000); // 250 - 60
+            let layer2 = Math.min(remaining, 190000000); 
             tax += layer2 * 0.15;
             remaining -= layer2;
         }
 
         // Layer 3
         if (remaining > 0) {
-            let layer3 = Math.min(remaining, 250000000); // 500 - 250
+            let layer3 = Math.min(remaining, 250000000); 
             tax += layer3 * 0.25;
             remaining -= layer3;
         }
 
         // Layer 4
         if (remaining > 0) {
-            let layer4 = Math.min(remaining, 4500000000); // 5B - 500M
+            let layer4 = Math.min(remaining, 4500000000); 
             tax += layer4 * 0.30;
             remaining -= layer4;
         }
@@ -375,18 +382,16 @@
         let vBase = parseFloat(document.getElementById('vatBase').value);
         if (!manualVatBase || isNaN(vBase)) {
             vBase = amount;
-            document.getElementById('vatBase').value = amount; // auto-update UI
+            document.getElementById('vatBase').value = amount; 
         }
 
         // 3. Handle WHT Base & Logic
         let wBase = parseFloat(document.getElementById('whtBase').value) || 0;
         
-        // Auto-update WHT Base if PPh 21 is selected (Force 50%)
         if (whtType === 'pph21_ind') {
             wBase = amount * 0.5;
             document.getElementById('whtBase').value = wBase;
         } else if (whtType !== 'manual' && document.getElementById('whtBase').value == '') {
-             // For others, if empty, default to amount
              wBase = amount;
              document.getElementById('whtBase').value = wBase;
         }
@@ -398,14 +403,13 @@
         let noteText = "";
 
         if (whtType === 'pph21_ind') {
-            // Use Progressive Function
             whtVal = calculatePPh21Progressive(wBase);
             noteText = `* PPh 21 Calculation: Tax Base is 50% of Amount (${formatIDR(wBase)}). Progressive rates (5%-35%) applied.`;
         } else {
             // Standard Calculation
             whtVal = wBase * manualWhtRate;
             if (whtType !== 'none') {
-                noteText = `* Standard Calculation: ${manualWhtRate*100}% on Tax Base (${formatIDR(wBase)}).`;
+                noteText = `* Rate applied: ${(manualWhtRate*100).toFixed(2)}% on Tax Base (${formatIDR(wBase)}).`;
             }
         }
 
