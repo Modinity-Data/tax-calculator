@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modinity Group | Tax Calculator v1.6</title>
+  <title>Modinity Group | Tax Calculator v1.8</title>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
   <style>
     /* =========================
-       Design System (UI only)
+       Design System
        ========================= */
     :root {
       /* Light */
@@ -25,12 +27,13 @@
       --danger: #dc3545;
       --danger-bg: rgba(220, 53, 69, 0.08);
 
+      --excel-green: #1d6f42; 
+      --excel-green-hover: #144f2f;
+
       --shadow: 0 18px 50px rgba(11, 15, 23, 0.08);
       --shadow-soft: 0 10px 30px rgba(11, 15, 23, 0.06);
 
       --radius: 14px;
-      --radius-sm: 10px;
-
       --focus: 0 0 0 4px rgba(17, 17, 17, 0.18);
 
       --disabled-bg: rgba(11, 15, 23, 0.07);
@@ -51,6 +54,9 @@
 
       --brand: #ffffff;
       --brand-2: rgba(255, 255, 255, 0.85);
+      
+      --excel-green: #21a366; 
+      --excel-green-hover: #1b8553;
 
       --danger: #ff6b6b;
       --danger-bg: rgba(255, 107, 107, 0.12);
@@ -78,9 +84,7 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* =========================
-       Layout
-       ========================= */
+    /* Layout */
     .app-shell {
       max-width: 1040px;
       margin: 0 auto;
@@ -100,9 +104,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow-soft);
     }
-    [data-theme="dark"] .topbar {
-      background: rgba(18, 24, 33, 0.7);
-    }
+    [data-theme="dark"] .topbar { background: rgba(18, 24, 33, 0.7); }
 
     .brand {
       display: flex;
@@ -120,8 +122,6 @@
       place-items: center;
       color: var(--bg-surface);
       font-weight: 900;
-      letter-spacing: 0.5px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
       user-select: none;
     }
     [data-theme="dark"] .logo { color: #121821; }
@@ -130,7 +130,6 @@
       margin: 0;
       font-size: 16px;
       line-height: 1.2;
-      letter-spacing: 0.2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -144,31 +143,29 @@
     .actions {
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      gap: 8px;
     }
 
-    /* Theme toggle button */
-    .theme-toggle {
+    /* Toggle Buttons */
+    .icon-toggle {
       cursor: pointer;
       border: 1px solid var(--border-strong);
       background: var(--bg-surface);
       color: var(--text);
       border-radius: 999px;
-      padding: 9px 12px;
+      padding: 8px 12px;
       font-size: 13px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      transition: transform 0.12s ease, background-color 0.2s ease, border-color 0.2s ease;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    .theme-toggle:hover { transform: translateY(-1px); }
-    .theme-toggle:active { transform: translateY(0px); }
+    .icon-toggle:hover { transform: translateY(-1px); }
+    .icon-toggle span { font-size: 16px; line-height: 1; }
 
-    /* Main grid */
+    /* Grid Layout */
     .grid {
       display: grid;
       grid-template-columns: 1.15fr 0.85fr;
@@ -196,9 +193,9 @@
     .card-header .title {
       font-size: 13px;
       font-weight: 800;
-      letter-spacing: 0.6px;
       text-transform: uppercase;
       color: var(--muted);
+      letter-spacing: 0.5px;
     }
     .card-header .hintline {
       font-size: 12px;
@@ -221,11 +218,8 @@
       gap: 10px;
       margin-bottom: 10px;
     }
-    .section-title h3 {
-      margin: 0;
-      font-size: 13px;
-      letter-spacing: 0.2px;
-    }
+    .section-title h3 { margin: 0; font-size: 13px; }
+    
     .badge {
       font-size: 11px;
       font-weight: 800;
@@ -234,29 +228,22 @@
       background: var(--bg-soft);
       border: 1px solid var(--border);
       color: var(--muted);
-      white-space: nowrap;
     }
 
-    /* =========================
-       Form controls
-       ========================= */
+    /* Forms */
     .form-group { margin-bottom: 14px; }
 
     label {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
       font-size: 12px;
       font-weight: 800;
       color: var(--muted);
       margin-bottom: 6px;
-      letter-spacing: 0.2px;
     }
 
-    .control {
-      position: relative;
-    }
+    .control { position: relative; }
 
     select, input {
       width: 100%;
@@ -266,18 +253,11 @@
       font-size: 14px;
       background-color: var(--bg-surface);
       color: var(--text);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
       outline: none;
+      transition: border-color 0.2s;
     }
+    select:focus, input:focus { border-color: var(--border-strong); box-shadow: var(--focus); }
 
-    select:focus, input:focus {
-      border-color: var(--border-strong);
-      box-shadow: var(--focus);
-    }
-
-    input::placeholder { color: rgba(127,127,127,0.7); }
-
-    /* Prefix (IDR) */
     .prefix {
       position: absolute;
       left: 12px;
@@ -292,20 +272,15 @@
       padding: 5px 8px;
       pointer-events: none;
     }
-    .with-prefix input {
-      padding-left: 76px;
-    }
+    .with-prefix input { padding-left: 76px; }
 
-    /* Disabled */
     input:disabled, select:disabled {
       background-color: var(--disabled-bg) !important;
       color: var(--disabled-text) !important;
       cursor: not-allowed;
       border-color: transparent;
-      box-shadow: none !important;
     }
 
-    /* Alerts / special states (keep your existing class) */
     .ask-tax-team {
       background-color: var(--danger-bg) !important;
       border-color: var(--danger) !important;
@@ -313,162 +288,63 @@
       font-weight: 900;
     }
 
-    .hint {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-      line-height: 1.35;
-    }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+    .alert-msg { display: none; color: var(--danger); font-size: 11px; font-weight: 900; margin-top: 6px; }
 
-    .alert-msg {
-      display: none;
-      color: var(--danger);
-      font-size: 11px;
-      font-weight: 900;
-      margin-top: 6px;
-      line-height: 1.35;
-    }
-
-    /* =========================
-       Results
-       ========================= */
-    .results-sticky {
-      position: sticky;
-      top: 18px;
-    }
-
-    .results-surface {
-      background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent 45%),
-                  var(--bg-surface);
-    }
-
-    .results-panel {
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-
+    /* Results */
+    .results-sticky { position: sticky; top: 18px; }
+    .results-surface { background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent 45%), var(--bg-surface); }
+    .results-panel { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    
     .results-panel .kpi-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
+      display: flex; justify-content: space-between; margin-bottom: 10px;
     }
     .results-panel .kpi-title span {
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--muted);
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
+      font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase;
     }
 
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-
-    th, td {
-      padding: 12px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      text-align: left;
-      color: var(--muted);
-      font-weight: 800;
-      width: 55%;
-      font-size: 12px;
-      letter-spacing: 0.2px;
-    }
-
-    td {
-      text-align: right;
-      font-family: var(--mono);
-      font-weight: 800;
-      color: var(--text);
-      white-space: nowrap;
-    }
-
-    .total-row th, .total-row td {
-      border-bottom: none;
-      padding-top: 16px;
-    }
-    .total-row {
-      border-top: 1px solid var(--border-strong);
-    }
-    .total-row td {
-      font-size: 18px;
-      letter-spacing: 0.2px;
-    }
-
+    th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
+    th { text-align: left; color: var(--muted); font-weight: 800; width: 55%; font-size: 12px; }
+    td { text-align: right; font-family: var(--mono); font-weight: 800; color: var(--text); }
+    
+    .total-row th, .total-row td { border-bottom: none; padding-top: 16px; }
+    .total-row { border-top: 1px solid var(--border-strong); }
+    .total-row td { font-size: 18px; }
     .wht-row { color: #d9534f; }
     [data-theme="dark"] .wht-row { color: #ff6b6b; }
 
-    #logicNote {
-      margin-top: 12px;
-      font-size: 11px;
-      color: var(--muted);
-      font-style: italic;
-      line-height: 1.35;
-    }
+    #logicNote { margin-top: 12px; font-size: 11px; color: var(--muted); font-style: italic; }
 
     /* Buttons */
-    .copy-btn {
-      margin-top: 14px;
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid transparent;
-      background: var(--brand);
-      color: var(--bg-surface);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: transform 0.12s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    .btn-shared {
+      width: 100%; padding: 12px 14px; border-radius: 14px; border: none;
+      cursor: pointer; font-size: 13px; font-weight: 900; letter-spacing: 0.5px;
+      text-transform: uppercase; display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-top: 14px; transition: transform 0.1s;
       box-shadow: 0 14px 30px rgba(0,0,0,0.16);
     }
-    [data-theme="dark"] .copy-btn {
-      background: #ffffff;
-      color: #0b0f14;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.38);
-    }
-    .copy-btn:hover { transform: translateY(-1px); }
-    .copy-btn:active { transform: translateY(0px); }
-    .copy-btn svg { fill: currentColor; width: 18px; height: 18px; }
+    .btn-shared:active { transform: translateY(1px); }
+    .btn-shared svg { fill: currentColor; width: 18px; height: 18px; }
 
-    /* Toast (UI only) */
+    .copy-btn { background: var(--brand); color: var(--bg-surface); }
+    [data-theme="dark"] .copy-btn { background: #ffffff; color: #0b0f14; }
+
+    .excel-btn { background: var(--excel-green); color: #fff; margin-top: 10px; }
+    .excel-btn:hover { background: var(--excel-green-hover); }
+
+    /* Toast */
     .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.86);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
-      z-index: 9999;
+      position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+      background: rgba(0,0,0,0.86); color: white; padding: 10px 14px;
+      border-radius: 999px; font-size: 12px; font-weight: 800; opacity: 0;
+      pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 9999;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
 
-    /* Mobile */
     @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
-      .results-sticky { position: static; top: auto; }
+      .results-sticky { position: static; }
       body { padding: 22px 14px; }
     }
   </style>
@@ -476,60 +352,56 @@
 
 <body>
   <div class="app-shell">
-    <!-- Top Bar -->
+    
     <div class="topbar">
       <div class="brand">
         <div class="logo">M</div>
         <div style="min-width:0;">
-          <h1>Modinity Group · Tax Calculator</h1>
-          <div class="sub">VAT (PPN) + WHT (PPh) preview for PR form · v1.6</div>
+          <h1 id="txtBrandTitle">Modinity Group · Tax Calculator</h1>
+          <div class="sub" id="txtBrandSub">VAT (PPN) + WHT (PPh) preview for PR form · v1.8</div>
         </div>
       </div>
 
       <div class="actions">
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
-          <span>🌙</span> Dark Mode
+        <button class="icon-toggle" onclick="toggleLanguage()" id="langBtn" title="Switch Language">
+          <span id="flagIcon">🇬🇧</span> <span id="langText">EN</span>
+        </button>
+        <button class="icon-toggle" onclick="toggleTheme()" id="themeBtn" title="Switch Theme">
+          <span>🌙</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="grid">
-      <!-- Inputs -->
       <div class="card">
         <div class="card-header">
-          <div class="title">Inputs</div>
-          <div class="hintline">Fill amount → choose VAT/WHT → copy results</div>
+          <div class="title" id="headInputs">Inputs</div>
+          <div class="hintline" id="subInputs">Fill amount → choose VAT/WHT → copy results</div>
         </div>
         <div class="card-body">
 
           <div class="section">
             <div class="section-title">
-              <h3>Invoice Amount</h3>
-              <span class="badge">Before tax</span>
+              <h3 id="secInvoice">Invoice Amount</h3>
+              <span class="badge" id="bdgBeforeTax">Before tax</span>
             </div>
-
             <div class="form-group">
-              <label>Amount (Before Tax)</label>
+              <label id="lblAmount">Amount (Before Tax)</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="inputAmount"
-                       placeholder="e.g. 10,000,000"
-                       onkeyup="formatCurrencyInput(this)"
-                       oninput="calculate()">
+                <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
-              <div class="hint">Tip: paste values with commas — formatting will stay clean.</div>
+              <div class="hint" id="hintPaste">Tip: paste values with commas — formatting will stay clean.</div>
             </div>
           </div>
 
           <div class="section">
             <div class="section-title">
-              <h3>VAT (PPN)</h3>
-              <span class="badge">Tariff + DPP</span>
+              <h3 id="secVat">VAT (PPN)</h3>
+              <span class="badge" id="bdgTariff">Tariff + DPP</span>
             </div>
-
             <div class="form-group">
-              <label>VAT Tariff (PPN)</label>
+              <label id="lblVatTariff">VAT Tariff (PPN)</label>
               <div class="control">
                 <select id="vatTariff" onchange="handleVatChange()">
                   <option value="0.11" selected>11% (Standard Goods/Services)</option>
@@ -538,40 +410,32 @@
                   <option value="manual">Manual Input</option>
                 </select>
               </div>
-              <div class="hint">Use Manual Input only when tariff differs from standard policy.</div>
+              <div class="hint" id="hintVatMan">Use Manual Input only when tariff differs from standard policy.</div>
             </div>
-
-            <div class="form-group" id="vatManualGroup">
-              <label>Custom VAT Rate (%)</label>
+            <div class="form-group" id="vatManualGroup" style="display:none;">
+              <label id="lblCustVat">Custom VAT Rate (%)</label>
               <div class="control">
-                <input type="number" id="vatRateInput" value="0" step="0.01"
-                       placeholder="e.g. 12"
-                       oninput="calculate()">
+                <input type="number" id="vatRateInput" value="0" step="0.01" placeholder="e.g. 12" oninput="calculate()">
               </div>
-              <div class="hint">Enter the percentage number (e.g. for 12%, type 12).</div>
+              <div class="hint" id="hintCustVat">Enter the percentage number (e.g. for 12%, type 12).</div>
             </div>
-
             <div class="form-group">
-              <label>Tax Base (VAT) / DPP PPN</label>
+              <label id="lblVatBase">Tax Base (VAT) / DPP PPN</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="vatBase"
-                       placeholder="Auto-fills from Amount"
-                       onkeyup="formatCurrencyInput(this)"
-                       oninput="manualOverride('vatBase')">
+                <input type="text" inputmode="numeric" id="vatBase" placeholder="Auto-fills from Amount" onkeyup="formatCurrencyInput(this)" oninput="manualOverride('vatBase')">
               </div>
-              <div class="hint">Leave empty to use Invoice Amount.</div>
+              <div class="hint" id="hintVatBase">Leave empty to use Invoice Amount.</div>
             </div>
           </div>
 
           <div class="section">
             <div class="section-title">
-              <h3>Withholding (PPh)</h3>
-              <span class="badge">Type + Rate + DPP</span>
+              <h3 id="secWht">Withholding (PPh)</h3>
+              <span class="badge" id="bdgWht">Type + Rate + DPP</span>
             </div>
-
             <div class="form-group">
-              <label>Withholding Tax Type (PPh)</label>
+              <label id="lblWhtType">Withholding Tax Type (PPh)</label>
               <div class="control">
                 <select id="whtType" onchange="updateWHTSettings()">
                   <option value="none">No WHT / Non-WHT</option>
@@ -585,21 +449,16 @@
                 </select>
               </div>
             </div>
-
             <div class="form-group">
-              <label>Tax Base (WHT) / DPP PPh</label>
+              <label id="lblWhtBase">Tax Base (WHT) / DPP PPh</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="whtBase"
-                       placeholder="Auto-fills based on Logic"
-                       onkeyup="formatCurrencyInput(this)"
-                       oninput="calculate()">
+                <input type="text" inputmode="numeric" id="whtBase" placeholder="Auto-fills based on Logic" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
               <div class="hint" id="whtBaseHint">Standard: Same as Amount</div>
             </div>
-
             <div class="form-group">
-              <label>WHT Rate (%)</label>
+              <label id="lblWhtRate">WHT Rate (%)</label>
               <div class="control">
                 <input type="number" id="whtRate" value="2" step="0.01" oninput="calculate()">
               </div>
@@ -610,70 +469,70 @@
 
           <div class="section">
             <div class="section-title">
-              <h3>Other</h3>
-              <span class="badge">Reimbursement</span>
+              <h3 id="secOther">Other</h3>
+              <span class="badge" id="bdgReimb">Reimbursement</span>
             </div>
-
             <div class="form-group">
-              <label>Non-Tax Base / Reimbursement</label>
+              <label id="lblNonTax">Non-Tax Base / Reimbursement</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="nonTaxBase" value="0"
-                       onkeyup="formatCurrencyInput(this)"
-                       oninput="calculate()">
+                <input type="text" inputmode="numeric" id="nonTaxBase" value="0" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
-              <div class="hint">Added on top of total cash out.</div>
+              <div class="hint" id="hintNonTax">Added on top of total cash out.</div>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- Results -->
       <div class="results-sticky">
         <div class="card results-surface">
           <div class="card-header">
-            <div class="title">Result Preview</div>
-            <div class="hintline">Copy-paste ready</div>
+            <div class="title" id="headResult">Result Preview</div>
+            <div class="hintline" id="subResult">Copy-paste ready</div>
           </div>
           <div class="card-body">
             <div class="results-panel">
               <div class="kpi-title">
-                <span>Calculated Output</span>
+                <span id="kpiOutput">Calculated Output</span>
                 <span class="badge">IDR</span>
               </div>
 
               <table id="resultTable">
                 <tr>
-                  <th>Amount (Before Tax)</th>
+                  <th id="thAmount">Amount (Before Tax)</th>
                   <td id="outAmount">0</td>
                 </tr>
                 <tr>
-                  <th>VAT Amount (PPN)</th>
+                  <th id="thVat">VAT Amount (PPN)</th>
                   <td id="outVAT">0</td>
                 </tr>
                 <tr>
-                  <th>WHT Amount (PPh)</th>
+                  <th id="thWht">WHT Amount (PPh)</th>
                   <td id="outWHT" class="wht-row">(0)</td>
                 </tr>
                 <tr>
-                  <th>Non-Tax Base</th>
+                  <th id="thNonTax">Non-Tax Base</th>
                   <td id="outNonTax">0</td>
                 </tr>
                 <tr class="total-row">
-                  <th>TOTAL CASH OUT</th>
+                  <th id="thTotal">TOTAL CASH OUT</th>
                   <td id="outTotal">0</td>
                 </tr>
               </table>
 
               <div id="logicNote"></div>
 
-              <button class="copy-btn" onclick="copyTable()">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
-                </svg>
-                COPY TABLE (FOR PR FORM)
+              <button class="btn-shared copy-btn" onclick="copyTable()">
+                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                <span id="btnCopy">COPY TABLE (FOR PR FORM)</span>
               </button>
+
+              <button class="btn-shared excel-btn" onclick="exportToExcel()">
+                <svg viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H2.83Q2.5 20.75 2.26 20.5 2 20.26 2 19.92V4.08Q2 3.74 2.26 3.5 2.5 3.25 2.83 3.25ZM11 13V19H20V13ZM4 13V19H9V13ZM11 5V11H20V5ZM4 5V11H9V5Z" /></svg>
+                <span id="btnExcel">EXPORT TO EXCEL</span>
+              </button>
+
             </div>
           </div>
         </div>
@@ -685,28 +544,93 @@
   <div class="toast" id="toast">Copied to clipboard ✅</div>
 
   <script>
+    // --- LANGUAGE DICTIONARY ---
+    const i18n = {
+      en: {
+        flag: "🇬🇧", name: "EN",
+        txtBrandTitle: "Modinity Group · Tax Calculator",
+        txtBrandSub: "VAT (PPN) + WHT (PPh) preview for PR form · v1.8",
+        headInputs: "Inputs", subInputs: "Fill amount → choose VAT/WHT → copy results",
+        secInvoice: "Invoice Amount", bdgBeforeTax: "Before tax", lblAmount: "Amount (Before Tax)", hintPaste: "Tip: paste values with commas — formatting will stay clean.",
+        secVat: "VAT (PPN)", bdgTariff: "Tariff + DPP", lblVatTariff: "VAT Tariff (PPN)", hintVatMan: "Use Manual Input only when tariff differs from standard policy.",
+        lblCustVat: "Custom VAT Rate (%)", hintCustVat: "Enter the percentage number (e.g. for 12%, type 12).",
+        lblVatBase: "Tax Base (VAT) / DPP PPN", hintVatBase: "Leave empty to use Invoice Amount.",
+        secWht: "Withholding (PPh)", bdgWht: "Type + Rate + DPP", lblWhtType: "Withholding Tax Type (PPh)",
+        lblWhtBase: "Tax Base (WHT) / DPP PPh", whtBaseHint_std: "Standard: Same as Amount", whtBaseHint_calc: "Auto-calculated: 50% of Amount",
+        lblWhtRate: "WHT Rate (%)", whtRateHint_std: "Standard Rate: 2%", whtRateHint_prog: "Progressive Rate (5% - 35%) applied on 50% Base",
+        whtAlert_var: "⚠️ RATE VARIES! PLEASE ASK TAX TEAM.", whtAlert_ovs: "⚠️ RATE VARIES. PLEASE CONFIRM WITH THE TAX TEAM.",
+        secOther: "Other", bdgReimb: "Reimbursement", lblNonTax: "Non-Tax Base / Reimbursement", hintNonTax: "Added on top of total cash out.",
+        headResult: "Result Preview", subResult: "Copy-paste ready", kpiOutput: "Calculated Output",
+        thAmount: "Amount (Before Tax)", thVat: "VAT Amount (PPN)", thWht: "WHT Amount (PPh)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
+        btnCopy: "COPY TABLE (FOR PR FORM)", btnExcel: "EXPORT TO EXCEL",
+        toast: "Copied to clipboard ✅"
+      },
+      id: {
+        flag: "🇮🇩", name: "ID",
+        txtBrandTitle: "Modinity Group · Kalkulator Pajak",
+        txtBrandSub: "Pratinjau PPN + PPh untuk form PR · v1.8",
+        headInputs: "Input", subInputs: "Isi nilai → pilih PPN/PPh → salin hasil",
+        secInvoice: "Nilai Invoice", bdgBeforeTax: "Sebelum Pajak", lblAmount: "Nilai (Sebelum Pajak)", hintPaste: "Tip: paste angka dengan koma — format tetap rapi.",
+        secVat: "PPN (VAT)", bdgTariff: "Tarif + DPP", lblVatTariff: "Tarif PPN", hintVatMan: "Gunakan Input Manual hanya jika tarif berbeda dari standar.",
+        lblCustVat: "Tarif PPN Khusus (%)", hintCustVat: "Masukkan angka persentase (cth: untuk 12%, ketik 12).",
+        lblVatBase: "Dasar Pengenaan Pajak (DPP PPN)", hintVatBase: "Biarkan kosong jika sama dengan Nilai Invoice.",
+        secWht: "Potongan PPh (WHT)", bdgWht: "Tipe + Tarif + DPP", lblWhtType: "Tipe PPh Pemotongan",
+        lblWhtBase: "Dasar Pengenaan Pajak (DPP PPh)", whtBaseHint_std: "Standar: Sama dengan Nilai Invoice", whtBaseHint_calc: "Otomatis: 50% dari Nilai Invoice",
+        lblWhtRate: "Tarif PPh (%)", whtRateHint_std: "Tarif Standar: 2%", whtRateHint_prog: "Tarif Progresif (5% - 35%) dari 50% DPP",
+        whtAlert_var: "⚠️ TARIF BERVARIASI! HARAP TANYA TIM PAJAK.", whtAlert_ovs: "⚠️ TARIF BERVARIASI. HARAP KONFIRMASI DENGAN TIM PAJAK.",
+        secOther: "Lainnya", bdgReimb: "Reimbursement", lblNonTax: "Non-Tax Base / Reimbursement", hintNonTax: "Ditambahkan di luar perhitungan pajak.",
+        headResult: "Pratinjau Hasil", subResult: "Siap copy-paste", kpiOutput: "Hasil Perhitungan",
+        thAmount: "Nilai (Sebelum Pajak)", thVat: "Nilai PPN", thWht: "Nilai PPh (WHT)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
+        btnCopy: "SALIN TABEL (UNTUK FORM PR)", btnExcel: "EXPORT KE EXCEL",
+        toast: "Tabel berhasil disalin ✅"
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'id' : 'en';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+    }
+
+    function applyLanguage() {
+      const t = i18n[currentLang];
+      
+      // Update Button
+      document.getElementById('flagIcon').innerText = t.flag;
+      document.getElementById('langText').innerText = t.name;
+
+      // Update Text Elements
+      const keys = Object.keys(t);
+      keys.forEach(key => {
+        const el = document.getElementById(key);
+        if(el) {
+           // Skip if strictly internal logic keys
+           if (['flag', 'name'].includes(key)) return;
+           el.innerText = t[key];
+        }
+      });
+
+      // Re-trigger dynamic hints update to ensure they switch lang too
+      updateWHTSettings();
+    }
+
     // --- THEME LOGIC ---
     function toggleTheme() {
       const body = document.body;
       const btn = document.getElementById('themeBtn');
       const isDark = body.getAttribute('data-theme') === 'dark';
-
       if (isDark) {
         body.removeAttribute('data-theme');
-        btn.innerHTML = '<span>🌙</span> Dark Mode';
         localStorage.setItem('theme', 'light');
       } else {
         body.setAttribute('data-theme', 'dark');
-        btn.innerHTML = '<span>☀️</span> Light Mode';
         localStorage.setItem('theme', 'dark');
       }
     }
+    if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.setAttribute('data-theme', 'dark');
-      document.getElementById('themeBtn').innerHTML = '<span>☀️</span> Light Mode';
-    }
 
     // --- CALCULATOR LOGIC ---
     let manualVatBase = false;
@@ -754,11 +678,15 @@
       const rateInput = document.getElementById('whtRate');
       const baseInput = document.getElementById('whtBase');
       const amount = getCleanNumber(document.getElementById('inputAmount').value);
+      
       const hint = document.getElementById('whtRateHint');
       const alertMsg = document.getElementById('whtAlert');
       const baseHint = document.getElementById('whtBaseHint');
 
-      // Defaults: Enabled and Clean
+      // Dictionary lookup for hints based on current language
+      const t = i18n[currentLang];
+
+      // Defaults
       rateInput.disabled = false;
       baseInput.disabled = false;
       rateInput.classList.remove('ask-tax-team');
@@ -767,37 +695,37 @@
 
       if (type === 'pph23_gen') {
         rateInput.value = 2; baseInput.value = formatWithCommas(amount);
-        hint.innerText = "Fixed Rate: 2%"; baseHint.innerText = "Standard: Same as Amount";
+        hint.innerText = t.whtRateHint_std; baseHint.innerText = t.whtBaseHint_std;
       }
       else if (type === 'pph23_royalty') {
         rateInput.value = 15; baseInput.value = formatWithCommas(amount);
-        hint.innerText = "Fixed Rate: 15%"; baseHint.innerText = "Standard: Same as Amount";
+        hint.innerText = "Fixed Rate: 15%"; baseHint.innerText = t.whtBaseHint_std;
       }
       else if (type === 'pph42_rent') {
         rateInput.value = 10; baseInput.value = formatWithCommas(amount);
-        hint.innerText = "Final Tax: 10%"; baseHint.innerText = "Standard: Same as Amount";
+        hint.innerText = "Final Tax: 10%"; baseHint.innerText = t.whtBaseHint_std;
       }
       else if (type === 'pph_final_const') {
         rateInput.value = 1.75; baseInput.value = formatWithCommas(amount);
         rateInput.classList.add('ask-tax-team'); hint.style.display = 'none'; alertMsg.style.display = 'block';
-        baseHint.innerText = "Standard: Same as Amount";
+        alertMsg.innerText = t.whtAlert_var;
+        baseHint.innerText = t.whtBaseHint_std;
       }
       else if (type === 'pph26') {
         rateInput.value = 20; baseInput.value = formatWithCommas(amount);
         rateInput.classList.add('ask-tax-team'); hint.style.display = 'none'; alertMsg.style.display = 'block';
-        alertMsg.innerText = "⚠️ RATE VARIES. PLEASE CONFIRM WITH THE TAX TEAM BEFORE ENTERING THIS INFORMATION."; baseHint.innerText = "Standard: Same as Amount";
+        alertMsg.innerText = t.whtAlert_ovs;
+        baseHint.innerText = t.whtBaseHint_std;
       }
       else if (type === 'pph21_ind') {
-        rateInput.value = 0;
-        rateInput.disabled = true; // GRAYED OUT
+        rateInput.value = 0; rateInput.disabled = true;
         baseInput.value = formatWithCommas(amount * 0.5);
-        hint.innerText = "Progressive Rate (5% - 35%) applied on 50% Base"; baseHint.innerText = "Auto-calculated: 50% of Amount";
+        hint.innerText = t.whtRateHint_prog; baseHint.innerText = t.whtBaseHint_calc;
       }
       else if (type === 'none') {
         rateInput.value = 0; baseInput.value = 0;
-        rateInput.disabled = true; // GRAYED OUT
-        baseInput.disabled = true; // GRAYED OUT
-        hint.innerText = "No Deduction"; baseHint.innerText = "-";
+        rateInput.disabled = true; baseInput.disabled = true;
+        hint.innerText = "-"; baseHint.innerText = "-";
       }
 
       calculate();
@@ -806,16 +734,12 @@
     function calculatePPh21Progressive(taxBase50) {
       let remaining = taxBase50;
       let tax = 0;
-      // Layer 1
+      if (remaining <= 0) return 0;
       let layer1 = Math.min(remaining, 60000000);
       if (layer1 > 0) { tax += layer1 * 0.05; remaining -= layer1; }
-      // Layer 2
       if (remaining > 0) { let layer2 = Math.min(remaining, 190000000); tax += layer2 * 0.15; remaining -= layer2; }
-      // Layer 3
       if (remaining > 0) { let layer3 = Math.min(remaining, 250000000); tax += layer3 * 0.25; remaining -= layer3; }
-      // Layer 4
       if (remaining > 0) { let layer4 = Math.min(remaining, 4500000000); tax += layer4 * 0.30; remaining -= layer4; }
-      // Layer 5
       if (remaining > 0) { tax += remaining * 0.35; }
       return tax;
     }
@@ -851,17 +775,20 @@
       }
 
       const vatVal = vBase * vatRate;
-
       let whtVal = 0;
       let noteText = "";
 
       if (whtType === 'pph21_ind') {
         whtVal = calculatePPh21Progressive(wBase);
-        noteText = `* PPh 21 Calculation: Tax Base is 50% of Amount (${formatIDR(wBase)}). Progressive rates (5%-35%) applied.`;
+        noteText = currentLang === 'en' 
+          ? `* PPh 21 Calculation: Tax Base is 50% of Amount (${formatIDR(wBase)}). Progressive rates (5%-35%) applied.`
+          : `* Perhitungan PPh 21: DPP adalah 50% dari Nilai (${formatIDR(wBase)}). Tarif progresif (5%-35%) diterapkan.`;
       } else {
         whtVal = wBase * manualWhtRate;
         if (whtType !== 'none') {
-          noteText = `* Rate applied: ${(manualWhtRate*100).toFixed(2)}% on Tax Base (${formatIDR(wBase)}).`;
+          noteText = currentLang === 'en'
+            ? `* Rate applied: ${(manualWhtRate*100).toFixed(2)}% on Tax Base (${formatIDR(wBase)}).`
+            : `* Tarif diterapkan: ${(manualWhtRate*100).toFixed(2)}% pada DPP (${formatIDR(wBase)}).`;
         }
       }
 
@@ -883,26 +810,84 @@
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
-
       try {
         document.execCommand('copy');
-        // UI enhancement: toast (keeps your logic + alert still works if you prefer)
         const t = document.getElementById('toast');
+        t.innerText = i18n[currentLang].toast;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 1500);
-
-        // keep original behavior message (optional; comment out if you want only toast)
-        // alert('Table copied! You can now paste it into your PR FORM.');
-      } catch (err) {
-        alert('Unable to copy manually.');
-      }
+      } catch (err) { alert('Unable to copy manually.'); }
     }
 
-    // Nice default behavior: initialize dependent fields once
+    // --- NEW: CLEAN EXCEL EXPORT (Inputs + Outputs, No Formatting) ---
+    function exportToExcel() {
+      // 1. Gather Raw Data
+      const amount = getCleanNumber(document.getElementById('inputAmount').value);
+      
+      // Get VAT Data
+      let vatRateRaw = 0;
+      if (document.getElementById('vatTariff').value === 'manual') {
+        vatRateRaw = (parseFloat(document.getElementById('vatRateInput').value) || 0) / 100;
+      } else {
+        vatRateRaw = parseFloat(document.getElementById('vatTariff').value);
+      }
+      const vatBase = getCleanNumber(document.getElementById('vatBase').value);
+      const vatVal = vatBase * vatRateRaw;
+
+      // Get WHT Data
+      const whtTypeSelect = document.getElementById('whtType');
+      const whtTypeName = whtTypeSelect.options[whtTypeSelect.selectedIndex].text;
+      const whtBase = getCleanNumber(document.getElementById('whtBase').value);
+      let whtRateRaw = (parseFloat(document.getElementById('whtRate').value) || 0) / 100;
+      
+      let whtVal = 0;
+      if (document.getElementById('whtType').value === 'pph21_ind') {
+        whtVal = calculatePPh21Progressive(whtBase);
+        // For excel clarity, maybe show effective rate or just label 'Progressive'
+      } else {
+        whtVal = whtBase * whtRateRaw;
+      }
+
+      const nonTax = getCleanNumber(document.getElementById('nonTaxBase').value);
+      const total = amount + vatVal - whtVal + nonTax;
+
+      // 2. Build Data Array (2 Columns: Label | Value)
+      // We use raw numbers so Excel can calculate them.
+      const data = [
+        ["Modinity Group Tax Calculation", ""],
+        ["Date Generated", new Date().toISOString().split('T')[0]],
+        ["", ""],
+        ["--- INPUTS ---", ""],
+        ["Invoice Amount (Before Tax)", amount],
+        ["VAT Tariff (%)", vatRateRaw],
+        ["VAT Base (DPP PPN)", vatBase],
+        ["WHT Type", whtTypeName],
+        ["WHT Base (DPP PPh)", whtBase],
+        ["WHT Rate (%)", document.getElementById('whtType').value === 'pph21_ind' ? "Progressive" : whtRateRaw],
+        ["Non-Tax Base", nonTax],
+        ["", ""],
+        ["--- OUTPUTS ---", ""],
+        ["Amount (Before Tax)", amount],
+        ["VAT Amount", vatVal],
+        ["WHT Amount", whtVal], // Export positive number, usually easy to calculate
+        ["Non-Tax Base", nonTax],
+        ["TOTAL CASH OUT", total]
+      ];
+
+      // 3. Generate Sheet
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      
+      // Optional: Set column width
+      ws['!cols'] = [{wch: 30}, {wch: 20}];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Tax Calc");
+      XLSX.writeFile(wb, "Modinity_Tax_Calc.xlsx");
+    }
+
+    // Initialize
     window.addEventListener('DOMContentLoaded', () => {
-      handleVatChange();
-      updateWHTSettings();
-      calculate();
+      applyLanguage(); // Apply saved language
     });
   </script>
 </body>
