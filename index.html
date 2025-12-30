@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modinity Group | Tax Calculator v1.5</title>
+    <title>Modinity Group | Tax Calculator v1.6</title>
     <style>
         /* --- COLOR THEMES --- */
         :root {
@@ -14,6 +14,8 @@
             --bg-container: #ffffff;
             --input-bg: #ffffff;
             --input-border: #ddd;
+            --disabled-bg: #e9ecef; /* NEW: Distinct Gray for Disabled */
+            --disabled-text: #6c757d;
             --border-radius: 8px;
             --alert-bg: #fff5f5;
             --alert-border: #dc3545;
@@ -33,6 +35,8 @@
             --bg-container: #1e1e1e;
             --input-bg: #2d2d2d;
             --input-border: #444;
+            --disabled-bg: #3e3e3e; /* Dark Gray for Disabled */
+            --disabled-text: #777;
             --alert-bg: #4c1d1d;
             --alert-border: #ff6b6b;
             --alert-text: #ff6b6b;
@@ -119,6 +123,14 @@
 
         select:focus, input:focus { outline: none; border-color: var(--primary-text); }
 
+        /* DISABLED INPUT STYLE (GRAY SHADE) */
+        input:disabled, select:disabled {
+            background-color: var(--disabled-bg) !important;
+            color: var(--disabled-text) !important;
+            cursor: not-allowed;
+            border-color: transparent;
+        }
+
         /* SPECIAL ALERTS */
         .ask-tax-team {
             background-color: var(--alert-bg) !important;
@@ -177,6 +189,7 @@
         .wht-row { color: #d9534f; }
         [data-theme="dark"] .wht-row { color: #ff6b6b; }
 
+        /* BUTTON WITH ICON */
         .copy-btn {
             background-color: var(--btn-bg); 
             color: var(--btn-text); 
@@ -191,6 +204,15 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* Space between icon and text */
+        }
+        .copy-btn svg {
+            fill: currentColor;
+            width: 18px;
+            height: 18px;
         }
         .copy-btn:hover {
             background-color: var(--btn-hover);
@@ -240,7 +262,8 @@
                 <option value="0.11" selected>11% (Standard Goods/Services)</option>
                 <option value="0.011">1.1% (Freight/Shipping)</option>
                 <option value="0">0% (No VAT)</option>
-                <option value="manual">Manual Input</option> </select>
+                <option value="manual">Manual Input</option>
+            </select>
         </div>
 
         <div class="form-group" id="vatManualGroup">
@@ -319,7 +342,12 @@
         
         <div id="logicNote" style="margin-top: 15px; font-size: 11px; color: var(--secondary-text); font-style: italic;"></div>
 
-        <button class="copy-btn" onclick="copyTable()">COPY TABLE (FOR PR)</button>
+        <button class="copy-btn" onclick="copyTable()">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+            </svg>
+            COPY TABLE (FOR PR FORM)
+        </button>
     </div>
 </div>
 
@@ -397,7 +425,7 @@
         const alertMsg = document.getElementById('whtAlert');
         const baseHint = document.getElementById('whtBaseHint');
 
-        // Defaults
+        // Defaults: Enabled and Clean
         rateInput.disabled = false;
         baseInput.disabled = false;
         rateInput.classList.remove('ask-tax-team');
@@ -427,11 +455,17 @@
             alertMsg.innerText = "⚠️ RATE 0-20%. CHECK TREATY WITH TAX TEAM."; baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph21_ind') {
-            rateInput.value = 0; rateInput.disabled = true; baseInput.value = formatWithCommas(amount * 0.5); 
+            rateInput.value = 0; 
+            rateInput.disabled = true; // GRAYED OUT 
+            baseInput.value = formatWithCommas(amount * 0.5); 
+            // Optional: If you want to force 50% base strictly, disable baseInput too:
+            // baseInput.disabled = true; 
             hint.innerText = "Progressive Rate (5% - 35%) applied on 50% Base"; baseHint.innerText = "Auto-calculated: 50% of Amount";
         }
         else if (type === 'none') {
-            rateInput.value = 0; baseInput.value = 0; rateInput.disabled = true; baseInput.disabled = true; 
+            rateInput.value = 0; baseInput.value = 0; 
+            rateInput.disabled = true; // GRAYED OUT
+            baseInput.disabled = true; // GRAYED OUT
             hint.innerText = "No Deduction"; baseHint.innerText = "-";
         }
 
@@ -458,7 +492,6 @@
     function calculate() {
         const amount = getCleanNumber(document.getElementById('inputAmount').value);
         
-        // VAT Logic
         let vatRate = 0;
         const vatSelect = document.getElementById('vatTariff').value;
         if (vatSelect === 'manual') {
@@ -522,7 +555,7 @@
         
         try {
             document.execCommand('copy');
-            alert('Table copied! You can now paste it into your email or PR form.');
+            alert('Table copied! You can now paste it into your PR FORM.');
         } catch (err) {
             alert('Unable to copy manually.');
         }
