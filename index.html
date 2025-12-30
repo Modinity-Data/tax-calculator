@@ -10,6 +10,9 @@
             --accent-color: #666;
             --bg-color: #f8f9fa;
             --border-radius: 8px;
+            --alert-bg: #fff5f5;
+            --alert-border: #dc3545;
+            --alert-text: #dc3545;
         }
 
         body {
@@ -61,11 +64,28 @@
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box; 
+            transition: all 0.3s ease;
         }
 
         select:focus, input:focus {
             outline: none;
             border-color: var(--primary-color);
+        }
+
+        /* ALERT STYLE FOR "ASK TAX TEAM" */
+        .ask-tax-team {
+            background-color: var(--alert-bg) !important;
+            border-color: var(--alert-border) !important;
+            color: var(--alert-text) !important;
+            font-weight: 700;
+        }
+        
+        .alert-msg {
+            display: none;
+            color: var(--alert-text);
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 4px;
         }
 
         .hint {
@@ -118,17 +138,16 @@
             color: #d9534f;
         }
 
-        /* UPDATED BUTTON STYLE */
         .copy-btn {
-            background-color: #000; /* Black background */
-            color: #fff; /* White Text */
+            background-color: #000; 
+            color: #fff; 
             border: 2px solid #000;
             margin-top: 20px;
             width: 100%;
             padding: 12px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 700; /* BOLD */
+            font-weight: 700; 
             border-radius: 4px;
             transition: all 0.3s ease;
             text-transform: uppercase;
@@ -188,9 +207,9 @@
                 <option value="pph23_gen" selected>PPh 23 - General Services (2%)</option>
                 <option value="pph23_royalty">PPh 23 - Royalty (15%)</option>
                 <option value="pph42_rent">PPh 4(2) Final - Rent Office/Store (10%)</option>
-                <option value="pph_final_const">WHT Final - Construction & Others (Varied)</option> <option value="pph21_ind">PPh 21 - Individual / Tenaga Ahli (Progressive)</option>
-                <option value="pph26">PPh 26 - Overseas (20%)</option>
-                <option value="manual">Manual Input</option>
+                <option value="pph_final_const">WHT Final - Construction & Others (Varied)</option> 
+                <option value="pph21_ind">PPh 21 - Individual / Tenaga Ahli (Progressive)</option>
+                <option value="pph26">PPh 26 - Overseas (0-20%)</option> <option value="manual">Manual Input</option>
             </select>
         </div>
 
@@ -204,6 +223,7 @@
             <label>WHT Rate (%)</label>
             <input type="number" id="whtRate" value="2" step="0.01" oninput="calculate()">
             <div class="hint" id="whtRateHint">Standard Rate: 2%</div>
+            <div class="alert-msg" id="whtAlert">⚠️ RATE VARIES! PLEASE ASK TAX TEAM.</div>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
@@ -264,13 +284,19 @@
         const rateInput = document.getElementById('whtRate');
         const baseInput = document.getElementById('whtBase');
         const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
+        
         const hint = document.getElementById('whtRateHint');
+        const alertMsg = document.getElementById('whtAlert');
         const baseHint = document.getElementById('whtBaseHint');
 
-        // Reset
+        // Reset Styles & States
         rateInput.disabled = false;
         baseInput.disabled = false;
+        rateInput.classList.remove('ask-tax-team');
+        alertMsg.style.display = 'none';
+        hint.style.display = 'block';
         
+        // LOGIC SWITCHER
         if (type === 'pph23_gen') {
             rateInput.value = 2;
             baseInput.value = amount;
@@ -290,22 +316,26 @@
             baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph_final_const') {
-            // NEW LOGIC FOR CONSTRUCTION
-            rateInput.value = 1.75; // Default guess
-            rateInput.disabled = false; // User must verify
+            // RED ALERT
+            rateInput.value = 1.75; 
             baseInput.value = amount;
-            // Cheat sheet for users
-            hint.innerText = "Common Rates: 1.75% (Small), 2.65% (Med/Large), 4% (No Cert). Check Vendor!";
+            rateInput.classList.add('ask-tax-team'); // Turn Red
+            hint.style.display = 'none'; // Hide normal hint
+            alertMsg.style.display = 'block'; // Show Alert
             baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph26') {
-            rateInput.value = 20;
+            // RED ALERT (Overseas)
+            rateInput.value = 20; // Default max
             baseInput.value = amount;
-            hint.innerText = "Overseas: 20%";
+            rateInput.classList.add('ask-tax-team'); // Turn Red
+            hint.style.display = 'none';
+            alertMsg.style.display = 'block'; // Show Alert
+            alertMsg.innerText = "⚠️ RATE 0-20%. CHECK TREATY WITH TAX TEAM.";
             baseHint.innerText = "Standard: Same as Amount";
         }
         else if (type === 'pph21_ind') {
-            // Special Progressive Logic
+            // Progressive
             rateInput.value = 0; 
             rateInput.disabled = true; 
             baseInput.value = amount * 0.5; 
