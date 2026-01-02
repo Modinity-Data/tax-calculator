@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modinity Group | Tax Calculator v1.8</title>
+  <title>Modinity Group | Tax Calculator v1.9</title>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
@@ -358,7 +358,7 @@
         <div class="logo">M</div>
         <div style="min-width:0;">
           <h1 id="txtBrandTitle">Modinity Group · Tax Calculator</h1>
-          <div class="sub" id="txtBrandSub">VAT (PPN) + WHT (PPh) preview for PR form · v1.8</div>
+          <div class="sub" id="txtBrandSub">VAT (PPN) + WHT (PPh) preview for PR form · v1.9</div>
         </div>
       </div>
 
@@ -382,12 +382,9 @@
 
           <div class="section">
             <div class="section-title">
-              <h3 id="secInvoice">Invoice Amount</h3>
-              <span class="badge" id="bdgBeforeTax">Before tax</span>
-            </div>
+              <h3 id="secInvoice">Taxable Income</h3> <span class="badge" id="bdgBeforeTax">Tax Base (VAT / WHT)</span> </div>
             <div class="form-group">
-              <label id="lblAmount">Amount (Before Tax)</label>
-              <div class="control with-prefix">
+              <label id="lblAmount">Taxable Income</label> <div class="control with-prefix">
                 <span class="prefix">IDR</span>
                 <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
@@ -425,8 +422,7 @@
                 <span class="prefix">IDR</span>
                 <input type="text" inputmode="numeric" id="vatBase" placeholder="Auto-fills from Amount" onkeyup="formatCurrencyInput(this)" oninput="manualOverride('vatBase')">
               </div>
-              <div class="hint" id="hintVatBase">Leave empty to use Invoice Amount.</div>
-            </div>
+              <div class="hint" id="hintVatBase">Leave empty to use Taxable Income.</div> </div>
           </div>
 
           <div class="section">
@@ -500,8 +496,7 @@
 
               <table id="resultTable">
                 <tr>
-                  <th id="thAmount">Amount (Before Tax)</th>
-                  <td id="outAmount">0</td>
+                  <th id="thAmount">Taxable Income</th> <td id="outAmount">0</td>
                 </tr>
                 <tr>
                   <th id="thVat">VAT Amount (PPN)</th>
@@ -549,38 +544,42 @@
       en: {
         flag: "🇬🇧", name: "EN",
         txtBrandTitle: "Modinity Group · Tax Calculator",
-        txtBrandSub: "VAT (PPN) + WHT (PPh) preview for PR form · v1.8",
+        txtBrandSub: "VAT (PPN) + WHT (PPh) preview for PR form · v1.9",
         headInputs: "Inputs", subInputs: "Fill amount → choose VAT/WHT → copy results",
-        secInvoice: "Invoice Amount", bdgBeforeTax: "Before tax", lblAmount: "Amount (Before Tax)", hintPaste: "Tip: paste values with commas — formatting will stay clean.",
+        // UPDATED LABELS
+        secInvoice: "Taxable Income", bdgBeforeTax: "Tax Base (VAT / WHT)", lblAmount: "Taxable Income", 
+        hintPaste: "Tip: Only input the amount subject to tax.",
         secVat: "VAT (PPN)", bdgTariff: "Tariff + DPP", lblVatTariff: "VAT Tariff (PPN)", hintVatMan: "Use Manual Input only when tariff differs from standard policy.",
         lblCustVat: "Custom VAT Rate (%)", hintCustVat: "Enter the percentage number (e.g. for 12%, type 12).",
-        lblVatBase: "Tax Base (VAT) / DPP PPN", hintVatBase: "Leave empty to use Invoice Amount.",
+        lblVatBase: "Tax Base (VAT) / DPP PPN", hintVatBase: "Leave empty to use Taxable Income.",
         secWht: "Withholding (PPh)", bdgWht: "Type + Rate + DPP", lblWhtType: "Withholding Tax Type (PPh)",
         lblWhtBase: "Tax Base (WHT) / DPP PPh", whtBaseHint_std: "Standard: Same as Amount", whtBaseHint_calc: "Auto-calculated: 50% of Amount",
         lblWhtRate: "WHT Rate (%)", whtRateHint_std: "Standard Rate: 2%", whtRateHint_prog: "Progressive Rate (5% - 35%) applied on 50% Base",
         whtAlert_var: "⚠️ RATE VARIES! PLEASE ASK TAX TEAM.", whtAlert_ovs: "⚠️ RATE VARIES. PLEASE CONFIRM WITH THE TAX TEAM.",
         secOther: "Other", bdgReimb: "Reimbursement", lblNonTax: "Non-Tax Base / Reimbursement", hintNonTax: "Added on top of total cash out.",
         headResult: "Result Preview", subResult: "Copy-paste ready", kpiOutput: "Calculated Output",
-        thAmount: "Amount (Before Tax)", thVat: "VAT Amount (PPN)", thWht: "WHT Amount (PPh)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
+        thAmount: "Taxable Income", thVat: "VAT Amount (PPN)", thWht: "WHT Amount (PPh)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
         btnCopy: "COPY TABLE (FOR PR FORM)", btnExcel: "EXPORT TO EXCEL",
         toast: "Copied to clipboard ✅"
       },
       id: {
         flag: "🇮🇩", name: "ID",
         txtBrandTitle: "Modinity Group · Kalkulator Pajak",
-        txtBrandSub: "Pratinjau PPN + PPh untuk form PR · v1.8",
+        txtBrandSub: "Pratinjau PPN + PPh untuk form PR · v1.9",
         headInputs: "Input", subInputs: "Isi nilai → pilih PPN/PPh → salin hasil",
-        secInvoice: "Nilai Invoice", bdgBeforeTax: "Sebelum Pajak", lblAmount: "Nilai (Sebelum Pajak)", hintPaste: "Tip: paste angka dengan koma — format tetap rapi.",
+        // UPDATED LABELS
+        secInvoice: "Penghasilan Kena Pajak", bdgBeforeTax: "Dasar Pengenaan Pajak", lblAmount: "Penghasilan Kena Pajak", 
+        hintPaste: "Tip: Hanya masukkan nilai yang dikenakan pajak.",
         secVat: "PPN (VAT)", bdgTariff: "Tarif + DPP", lblVatTariff: "Tarif PPN", hintVatMan: "Gunakan Input Manual hanya jika tarif berbeda dari standar.",
         lblCustVat: "Tarif PPN Khusus (%)", hintCustVat: "Masukkan angka persentase (cth: untuk 12%, ketik 12).",
-        lblVatBase: "Dasar Pengenaan Pajak (DPP PPN)", hintVatBase: "Biarkan kosong jika sama dengan Nilai Invoice.",
+        lblVatBase: "Dasar Pengenaan Pajak (DPP PPN)", hintVatBase: "Biarkan kosong jika sama dengan Penghasilan Kena Pajak.",
         secWht: "Potongan PPh (WHT)", bdgWht: "Tipe + Tarif + DPP", lblWhtType: "Tipe PPh Pemotongan",
-        lblWhtBase: "Dasar Pengenaan Pajak (DPP PPh)", whtBaseHint_std: "Standar: Sama dengan Nilai Invoice", whtBaseHint_calc: "Otomatis: 50% dari Nilai Invoice",
+        lblWhtBase: "Dasar Pengenaan Pajak (DPP PPh)", whtBaseHint_std: "Standar: Sama dengan Nilai Input", whtBaseHint_calc: "Otomatis: 50% dari Nilai Input",
         lblWhtRate: "Tarif PPh (%)", whtRateHint_std: "Tarif Standar: 2%", whtRateHint_prog: "Tarif Progresif (5% - 35%) dari 50% DPP",
         whtAlert_var: "⚠️ TARIF BERVARIASI! HARAP TANYA TIM PAJAK.", whtAlert_ovs: "⚠️ TARIF BERVARIASI. HARAP KONFIRMASI DENGAN TIM PAJAK.",
         secOther: "Lainnya", bdgReimb: "Reimbursement", lblNonTax: "Non-Tax Base / Reimbursement", hintNonTax: "Ditambahkan di luar perhitungan pajak.",
         headResult: "Pratinjau Hasil", subResult: "Siap copy-paste", kpiOutput: "Hasil Perhitungan",
-        thAmount: "Nilai (Sebelum Pajak)", thVat: "Nilai PPN", thWht: "Nilai PPh (WHT)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
+        thAmount: "Penghasilan Kena Pajak", thVat: "Nilai PPN", thWht: "Nilai PPh (WHT)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
         btnCopy: "SALIN TABEL (UNTUK FORM PR)", btnExcel: "EXPORT KE EXCEL",
         toast: "Tabel berhasil disalin ✅"
       }
@@ -819,12 +818,10 @@
       } catch (err) { alert('Unable to copy manually.'); }
     }
 
-    // --- NEW: CLEAN EXCEL EXPORT (Inputs + Outputs, No Formatting) ---
+    // --- CLEAN EXCEL EXPORT ---
     function exportToExcel() {
-      // 1. Gather Raw Data
       const amount = getCleanNumber(document.getElementById('inputAmount').value);
       
-      // Get VAT Data
       let vatRateRaw = 0;
       if (document.getElementById('vatTariff').value === 'manual') {
         vatRateRaw = (parseFloat(document.getElementById('vatRateInput').value) || 0) / 100;
@@ -834,7 +831,6 @@
       const vatBase = getCleanNumber(document.getElementById('vatBase').value);
       const vatVal = vatBase * vatRateRaw;
 
-      // Get WHT Data
       const whtTypeSelect = document.getElementById('whtType');
       const whtTypeName = whtTypeSelect.options[whtTypeSelect.selectedIndex].text;
       const whtBase = getCleanNumber(document.getElementById('whtBase').value);
@@ -843,7 +839,6 @@
       let whtVal = 0;
       if (document.getElementById('whtType').value === 'pph21_ind') {
         whtVal = calculatePPh21Progressive(whtBase);
-        // For excel clarity, maybe show effective rate or just label 'Progressive'
       } else {
         whtVal = whtBase * whtRateRaw;
       }
@@ -851,14 +846,12 @@
       const nonTax = getCleanNumber(document.getElementById('nonTaxBase').value);
       const total = amount + vatVal - whtVal + nonTax;
 
-      // 2. Build Data Array (2 Columns: Label | Value)
-      // We use raw numbers so Excel can calculate them.
       const data = [
         ["Modinity Group Tax Calculation", ""],
         ["Date Generated", new Date().toISOString().split('T')[0]],
         ["", ""],
         ["--- INPUTS ---", ""],
-        ["Invoice Amount (Before Tax)", amount],
+        ["Taxable Income", amount], // Updated Label
         ["VAT Tariff (%)", vatRateRaw],
         ["VAT Base (DPP PPN)", vatBase],
         ["WHT Type", whtTypeName],
@@ -867,19 +860,15 @@
         ["Non-Tax Base", nonTax],
         ["", ""],
         ["--- OUTPUTS ---", ""],
-        ["Amount (Before Tax)", amount],
+        ["Taxable Income", amount], // Updated Label
         ["VAT Amount", vatVal],
-        ["WHT Amount", whtVal], // Export positive number, usually easy to calculate
+        ["WHT Amount", whtVal], 
         ["Non-Tax Base", nonTax],
         ["TOTAL CASH OUT", total]
       ];
 
-      // 3. Generate Sheet
       const ws = XLSX.utils.aoa_to_sheet(data);
-      
-      // Optional: Set column width
       ws['!cols'] = [{wch: 30}, {wch: 20}];
-
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Tax Calc");
       XLSX.writeFile(wb, "Modinity_Tax_Calc.xlsx");
@@ -887,7 +876,7 @@
 
     // Initialize
     window.addEventListener('DOMContentLoaded', () => {
-      applyLanguage(); // Apply saved language
+      applyLanguage();
     });
   </script>
 </body>
