@@ -382,9 +382,9 @@
 
           <div class="section">
             <div class="section-title">
-              <h3 id="secInvoice">Taxable Income</h3> <span class="badge" id="bdgBeforeTax">Tax Base (VAT / WHT)</span> </div>
+              <h3 id="secInvoice">Taxable Amount</h3> <span class="badge" id="bdgBeforeTax">Tax Base (VAT / WHT)</span> </div>
             <div class="form-group">
-              <label id="lblAmount">Taxable Income</label> <div class="control with-prefix">
+              <label id="lblAmount">Taxable Amount</label> <div class="control with-prefix">
                 <span class="prefix">IDR</span>
                 <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
@@ -422,7 +422,7 @@
                 <span class="prefix">IDR</span>
                 <input type="text" inputmode="numeric" id="vatBase" placeholder="Auto-fills from Amount" onkeyup="formatCurrencyInput(this)" oninput="manualOverride('vatBase')">
               </div>
-              <div class="hint" id="hintVatBase">Leave empty to use Taxable Income.</div> </div>
+              <div class="hint" id="hintVatBase">Leave empty to use Taxable Amount.</div> </div>
           </div>
 
           <div class="section">
@@ -496,7 +496,7 @@
 
               <table id="resultTable">
                 <tr>
-                  <th id="thAmount">Taxable Income</th> <td id="outAmount">0</td>
+                  <th id="thAmount">Taxable Amount</th> <td id="outAmount">0</td>
                 </tr>
                 <tr>
                   <th id="thVat">VAT Amount (PPN)</th>
@@ -547,18 +547,18 @@
         txtBrandSub: "VAT (PPN) + WHT (PPh) preview for PR form · v1.9",
         headInputs: "Inputs", subInputs: "Fill amount → choose VAT/WHT → copy results",
         // UPDATED LABELS
-        secInvoice: "Taxable Income", bdgBeforeTax: "Tax Base (VAT / WHT)", lblAmount: "Taxable Income", 
+        secInvoice: "Taxable Amount", bdgBeforeTax: "Tax Base (VAT / WHT)", lblAmount: "Taxable Amount", 
         hintPaste: "Tip: Only input the amount subject to tax.",
         secVat: "VAT (PPN)", bdgTariff: "Tariff + DPP", lblVatTariff: "VAT Tariff (PPN)", hintVatMan: "Use Manual Input only when tariff differs from standard policy.",
         lblCustVat: "Custom VAT Rate (%)", hintCustVat: "Enter the percentage number (e.g. for 12%, type 12).",
-        lblVatBase: "Tax Base (VAT) / DPP PPN", hintVatBase: "Leave empty to use Taxable Income.",
+        lblVatBase: "Tax Base (VAT) / DPP PPN", hintVatBase: "Leave empty to use Taxable Amount.",
         secWht: "Withholding (PPh)", bdgWht: "Type + Rate + DPP", lblWhtType: "Withholding Tax Type (PPh)",
         lblWhtBase: "Tax Base (WHT) / DPP PPh", whtBaseHint_std: "Standard: Same as Amount", whtBaseHint_calc: "Auto-calculated: 50% of Amount",
         lblWhtRate: "WHT Rate (%)", whtRateHint_std: "Standard Rate: 2%", whtRateHint_prog: "Progressive Rate (5% - 35%) applied on 50% Base",
         whtAlert_var: "⚠️ RATE VARIES! PLEASE ASK TAX TEAM.", whtAlert_ovs: "⚠️ RATE VARIES. PLEASE CONFIRM WITH THE TAX TEAM.",
         secOther: "Other", bdgReimb: "Reimbursement", lblNonTax: "Non-Tax Base / Reimbursement", hintNonTax: "Added on top of total cash out.",
         headResult: "Result Preview", subResult: "Copy-paste ready", kpiOutput: "Calculated Output",
-        thAmount: "Taxable Income", thVat: "VAT Amount (PPN)", thWht: "WHT Amount (PPh)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
+        thAmount: "Taxable Amount", thVat: "VAT Amount (PPN)", thWht: "WHT Amount (PPh)", thNonTax: "Non-Tax Base", thTotal: "TOTAL CASH OUT",
         btnCopy: "COPY TABLE (FOR PR FORM)", btnExcel: "EXPORT TO EXCEL",
         toast: "Copied to clipboard ✅"
       },
@@ -851,7 +851,7 @@
         ["Date Generated", new Date().toISOString().split('T')[0]],
         ["", ""],
         ["--- INPUTS ---", ""],
-        ["Taxable Income", amount], // Updated Label
+        ["Taxable Amount", amount], // Updated Label
         ["VAT Tariff (%)", vatRateRaw],
         ["VAT Base (DPP PPN)", vatBase],
         ["WHT Type", whtTypeName],
@@ -860,7 +860,7 @@
         ["Non-Tax Base", nonTax],
         ["", ""],
         ["--- OUTPUTS ---", ""],
-        ["Taxable Income", amount], // Updated Label
+        ["Taxable Amount", amount], // Updated Label
         ["VAT Amount", vatVal],
         ["WHT Amount", whtVal], 
         ["Non-Tax Base", nonTax],
