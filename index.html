@@ -8,11 +8,7 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
   <style>
-    /* =========================
-       Design System
-       ========================= */
     :root {
-      /* Light */
       --bg-body: #f6f7fb;
       --bg-surface: #ffffff;
       --bg-soft: rgba(0, 0, 0, 0.03);
@@ -36,7 +32,6 @@
       --radius: 14px;
       --focus: 0 0 0 4px rgba(17, 17, 17, 0.18);
 
-      /* FROZEN / DISABLED */
       --disabled-bg: #000000;
       --disabled-text: #666666;
 
@@ -85,21 +80,11 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Layout */
-    .app-shell {
-      max-width: 1040px;
-      margin: 0 auto;
-      display: grid;
-      gap: 18px;
-    }
+    .app-shell { max-width: 1040px; margin: 0 auto; display: grid; gap: 18px; }
 
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 16px 18px;
-      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 16px 18px; border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
       border-radius: var(--radius);
@@ -107,47 +92,24 @@
     }
     [data-theme="dark"] .topbar { background: rgba(18, 24, 33, 0.7); }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
     .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 40px; height: 40px; border-radius: 12px;
       background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      display: grid;
-      place-items: center;
-      color: var(--bg-surface);
-      font-weight: 900;
-      user-select: none;
+      display: grid; place-items: center;
+      color: var(--bg-surface); font-weight: 900; user-select: none;
     }
     [data-theme="dark"] .logo { color: #121821; }
 
     .brand h1 {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin: 0; font-size: 16px; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .sub {
-      margin: 2px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
 
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .actions { display: flex; align-items: center; gap: 8px; }
 
-    /* Toggle Buttons */
     .icon-toggle {
       cursor: pointer;
       border: 1px solid var(--border-strong);
@@ -166,13 +128,7 @@
     .icon-toggle:hover { transform: translateY(-1px); }
     .icon-toggle span { font-size: 16px; line-height: 1; }
 
-    /* Grid Layout */
-    .grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 18px;
-      align-items: start;
-    }
+    .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; align-items: start; }
 
     .card {
       background: var(--bg-surface);
@@ -198,27 +154,14 @@
       color: var(--muted);
       letter-spacing: 0.5px;
     }
-    .card-header .hintline {
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .card-header .hintline { font-size: 12px; color: var(--muted); }
 
     .card-body { padding: 18px; }
 
-    .section {
-      padding: 14px 0 6px;
-      border-top: 1px dashed var(--border);
-      margin-top: 12px;
-    }
+    .section { padding: 14px 0 6px; border-top: 1px dashed var(--border); margin-top: 12px; }
     .section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
     .section-title h3 { margin: 0; font-size: 13px; }
 
     .badge {
@@ -231,7 +174,6 @@
       color: var(--muted);
     }
 
-    /* Forms */
     .form-group { margin-bottom: 14px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -277,17 +219,11 @@
     }
     .with-prefix input { padding-left: 76px; }
 
-    /* FROZEN / DISABLED STATE */
     input:disabled, select:disabled, .frozen-input {
       background-color: var(--disabled-bg) !important;
       color: var(--disabled-text) !important;
       cursor: not-allowed;
       border-color: #333;
-    }
-    .prefix-disabled {
-      background: #222 !important;
-      color: #555 !important;
-      border-color: #333 !important;
     }
 
     .ask-tax-team {
@@ -300,7 +236,6 @@
     .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
     .alert-msg { display: none; color: var(--danger); font-size: 11px; font-weight: 900; margin-top: 6px; }
 
-    /* Checkbox */
     .checkbox-wrapper {
       display: flex;
       align-items: center;
@@ -310,22 +245,12 @@
       background: var(--bg-soft);
       border-radius: 8px;
     }
-    .checkbox-wrapper input[type="checkbox"] {
-      width: 18px; height: 18px; accent-color: var(--brand);
-    }
+    .checkbox-wrapper input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--brand); }
     .checkbox-wrapper label { margin: 0; color: var(--text); cursor: pointer; }
 
-    /* Results */
     .results-sticky { position: sticky; top: 18px; }
     .results-surface { background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent 45%), var(--bg-surface); }
     .results-panel { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-
-    .results-panel .kpi-title {
-      display: flex; justify-content: space-between; margin-bottom: 10px;
-    }
-    .results-panel .kpi-title span {
-      font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase;
-    }
 
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { padding: 12px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -338,15 +263,9 @@
     .wht-row { color: #d9534f; }
     [data-theme="dark"] .wht-row { color: #ff6b6b; }
 
-    .remark-separator {
-      border-top: 1px solid var(--border-strong);
-      margin-top: 16px;
-      padding-top: 16px;
-    }
+    .remark-separator { border-top: 1px solid var(--border-strong); margin-top: 16px; padding-top: 16px; }
 
-    .val-container {
-      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
-    }
+    .val-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
     .mini-copy-btn {
       background: transparent; border: 1px solid var(--border); border-radius: 6px;
       color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center;
@@ -357,7 +276,6 @@
 
     #logicNote { margin-top: 12px; font-size: 11px; color: var(--muted); font-style: italic; }
 
-    /* Buttons */
     .btn-shared {
       width: 100%; padding: 12px 14px; border-radius: 14px; border: none;
       cursor: pointer; font-size: 13px; font-weight: 900; letter-spacing: 0.5px;
@@ -374,7 +292,6 @@
     .excel-btn { background: var(--excel-green); color: #fff; margin-top: 10px; }
     .excel-btn:hover { background: var(--excel-green-hover); }
 
-    /* Toast */
     .toast {
       position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
       background: rgba(0,0,0,0.86); color: white; padding: 10px 14px;
@@ -399,7 +316,7 @@
         <div class="logo">M</div>
         <div style="min-width:0;">
           <h1 id="txtBrandTitle">Modinity Group · Tax Calculator</h1>
-          <div class="sub" id="txtBrandSub">v2.3 · PR Form Helper</div>
+          <div class="sub" id="txtBrandSub">v2.4 · PR Form Helper</div>
         </div>
       </div>
 
@@ -452,12 +369,14 @@
               <label id="lblTaxable">Taxable Amount</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
+                <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000"
+                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
               <div class="hint" id="hintTaxable">Base amount for tax calculation (Standard VAT Base).</div>
             </div>
 
-            <div class="checkbox-wrapper">
+            <!-- Checkbox wrapper (ONLY for PKP; hidden for others) -->
+            <div id="diffBaseWrapper" class="checkbox-wrapper">
               <input type="checkbox" id="checkDiffBase" onchange="updateUI(); calculate();">
               <label for="checkDiffBase" id="lblDiffBase">VAT and WHT have different tax bases</label>
             </div>
@@ -466,7 +385,8 @@
               <label id="lblOtherBase">Other Taxable Amount</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="otherTaxableAmount" placeholder="e.g. 5,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
+                <input type="text" inputmode="numeric" id="otherTaxableAmount" placeholder="e.g. 5,000,000"
+                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
               <div class="hint" id="hintOther">Used as the WHT Tax Base.</div>
             </div>
@@ -475,7 +395,8 @@
               <label id="lblNonTax">Non-Taxable Amount</label>
               <div class="control with-prefix">
                 <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="nonTaxAmount" value="0" onkeyup="formatCurrencyInput(this)" oninput="calculate()">
+                <input type="text" inputmode="numeric" id="nonTaxAmount" value="0"
+                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
               </div>
             </div>
           </div>
@@ -548,7 +469,9 @@
                   <td>
                     <div class="val-container">
                       <span id="outAmountBeforeTax">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outAmountBeforeTaxRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                      <button class="mini-copy-btn" onclick="copyValue('outAmountBeforeTaxRaw')" title="Copy Value">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -557,7 +480,9 @@
                   <td>
                     <div class="val-container">
                       <span id="outVAT">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outVATRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                      <button class="mini-copy-btn" onclick="copyValue('outVATRaw')" title="Copy Value">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -566,7 +491,9 @@
                   <td class="wht-row">
                     <div class="val-container">
                       <span id="outWHT">(0)</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outWHTRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                      <button class="mini-copy-btn" onclick="copyValue('outWHTRaw')" title="Copy Value">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -575,23 +502,29 @@
                   <td>
                     <div class="val-container">
                       <span id="outTotal">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outTotalRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                      <button class="mini-copy-btn" onclick="copyValue('outTotalRaw')" title="Copy Value">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
               </table>
 
-              <div class="remark-separator">
-                <div class="kpi-title" style="margin-bottom: 10px;">
-                  <span id="kpiRemark">Remark :</span>
+              <!-- Remark section (can be hidden entirely) -->
+              <div class="remark-separator" id="remarkSection">
+                <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span id="kpiRemark" style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;">Remark :</span>
                 </div>
+
                 <table id="resultTableRemark">
                   <tr id="rowBaseVAT">
                     <th id="thBaseVAT">Tax Base VAT</th>
                     <td>
                       <div class="val-container">
                         <span id="outBaseVAT">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outBaseVATRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                        <button class="mini-copy-btn" onclick="copyValue('outBaseVATRaw')" title="Copy Value">
+                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -600,7 +533,9 @@
                     <td>
                       <div class="val-container">
                         <span id="outBaseWHT">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outBaseWHTRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                        <button class="mini-copy-btn" onclick="copyValue('outBaseWHTRaw')" title="Copy Value">
+                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -609,7 +544,9 @@
                     <td>
                       <div class="val-container">
                         <span id="outNonTaxBase">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outNonTaxBaseRaw')" title="Copy Value"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></button>
+                        <button class="mini-copy-btn" onclick="copyValue('outNonTaxBaseRaw')" title="Copy Value">
+                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -647,14 +584,14 @@
   <input type="hidden" id="outNonTaxBaseRaw" value="0">
 
   <script>
-    // --- LANGUAGE DICTIONARY ---
     const i18n = {
       en: {
         flag: "🇬🇧", name: "EN",
         headInputs: "Config & Inputs", subInputs: "Select Vendor Type & Invoice first",
         lblVendorType: "Vendor Type", lblInvoiceType: "Invoice Type",
         secAmount: "Amounts", bdgBase: "Tax Bases", lblTaxable: "Taxable Amount",
-        hintTaxable: "Base amount for tax calculation (Standard VAT Base).",
+        hintTaxableVAT: "Base amount for tax calculation (Standard VAT Base).",
+        hintTaxableWHT: "Base amount for tax calculation (Standard WHT Base).",
         lblDiffBase: "VAT and WHT have different tax bases", lblOtherBase: "Other Taxable Amount", hintOther: "Used as the WHT Tax Base.",
         lblNonTax: "Non-Taxable Amount",
         secVat: "VAT (PPN)", lblVatTariff: "VAT Tariff",
@@ -670,7 +607,8 @@
         headInputs: "Konfigurasi & Input", subInputs: "Pilih Tipe Vendor & Invoice dulu",
         lblVendorType: "Tipe Vendor", lblInvoiceType: "Tipe Invoice",
         secAmount: "Nilai Transaksi", bdgBase: "Dasar Pengenaan Pajak", lblTaxable: "Nilai Kena Pajak (DPP)",
-        hintTaxable: "Nilai dasar perhitungan pajak (Dasar PPN).",
+        hintTaxableVAT: "Nilai dasar perhitungan pajak (Dasar PPN).",
+        hintTaxableWHT: "Nilai dasar perhitungan pajak (Dasar PPh/WHT).",
         lblDiffBase: "DPP PPN dan PPh berbeda", lblOtherBase: "Nilai Kena Pajak Lainnya", hintOther: "Digunakan sebagai dasar PPh (WHT).",
         lblNonTax: "Nilai Tidak Kena Pajak",
         secVat: "PPN (VAT)", lblVatTariff: "Tarif PPN",
@@ -689,7 +627,8 @@
       currentLang = currentLang === 'en' ? 'id' : 'en';
       localStorage.setItem('lang', currentLang);
       applyLanguage();
-      updateWHTSettings();
+      updateUI();
+      calculate();
     }
 
     function applyLanguage() {
@@ -700,11 +639,10 @@
       const keys = Object.keys(t);
       keys.forEach(key => {
         const el = document.getElementById(key);
-        if (el && !['flag', 'name'].includes(key)) el.innerText = t[key];
+        if (el && !['flag','name','hintTaxableVAT','hintTaxableWHT'].includes(key)) el.innerText = t[key];
       });
     }
 
-    // --- THEME ---
     function toggleTheme() {
       const body = document.body;
       const isDark = body.getAttribute('data-theme') === 'dark';
@@ -713,7 +651,6 @@
     }
     if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
 
-    // --- UTILS ---
     function getCleanNumber(val) {
       if (!val) return 0;
       return parseFloat(val.replace(/,/g, '')) || 0;
@@ -723,13 +660,10 @@
       return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function formatIDR(num) {
-      return formatWithCommas(num);
-    }
+    function formatIDR(num) { return formatWithCommas(num); }
 
     function formatCurrencyInput(input) {
-      let value = input.value;
-      let clean = value.replace(/[^0-9.]/g, '');
+      let clean = (input.value || '').replace(/[^0-9.]/g, '');
       if (clean === "") return;
       let parts = clean.split('.');
       parts[0] = parseInt(parts[0] || "0").toLocaleString('en-US');
@@ -746,28 +680,10 @@
       });
     }
 
-    // =========================
-    // RULES IMPLEMENTED (per feedback)
-    // =========================
-    // A) Summary "Amount before tax" should be Taxable + Non-Tax (NOT Taxable + Other).
-    //    (This fixes PKP > Goods & Services case and makes logic consistent.)
-    //
-    // B) Remark visibility:
-    //    - PKP + Goods: show Tax Base VAT only (hide Tax Base WHT)
-    //    - Non-PKP + (Services/Goods/Goods&Services): show Tax Base VAT only (hide Tax Base WHT)
-    //    - Individual + Goods: show Tax Base WHT only (hide Tax Base VAT)
-    //
-    // C) Individual + Services:
-    //    - Taxable amount is main column (already)
-    //    - "Different base" checkbox auto-frozen OFF (force WHT base from taxable)
-    //    - WHT formula uses taxable amount (enforced)
-    // =========================
-
     function handleVendorChange() {
       const vendor = document.getElementById('vendorType').value;
       const whtSel = document.getElementById('whtType');
 
-      // Auto-fill for Individual
       if (vendor === 'individual') {
         whtSel.value = "pph21_ind";
       } else {
@@ -778,11 +694,60 @@
       calculate();
     }
 
+    function handleVatChange() {
+      const select = document.getElementById('vatTariff');
+      document.getElementById('vatManualGroup').style.display = (select.value === 'manual') ? 'block' : 'none';
+      calculate();
+    }
+
+    function updateTaxableHint() {
+      const vendor = document.getElementById('vendorType').value;
+      const hintEl = document.getElementById('hintTaxable');
+      const t = i18n[currentLang];
+
+      // Per your note: Non PKP & Individual => Standard WHT Base (not VAT base)
+      if (vendor === 'pkp') hintEl.innerText = t.hintTaxableVAT;
+      else hintEl.innerText = t.hintTaxableWHT;
+    }
+
+    // Remarks matrix per screenshot
+    function updateRemarkVisibility() {
+      const vendor = document.getElementById('vendorType').value;
+      const invoice = document.getElementById('invoiceType').value;
+
+      const remarkSection = document.getElementById('remarkSection');
+      const rowVAT = document.getElementById('rowBaseVAT');
+      const rowWHT = document.getElementById('rowBaseWHT');
+
+      // Defaults
+      remarkSection.style.display = 'block';
+      rowVAT.style.display = '';
+      rowWHT.style.display = '';
+
+      const isPKP = vendor === 'pkp';
+      const isNonPKPOrInd = vendor === 'non_pkp' || vendor === 'individual';
+
+      if (isPKP) {
+        // PKP: Services/Goods/Goods&Services => VAT + WHT (always show both)
+        rowVAT.style.display = '';
+        rowWHT.style.display = '';
+      } else if (isNonPKPOrInd) {
+        if (invoice === 'goods') {
+          // Non PKP & Individual + Goods (Purchase) => No Remarks
+          remarkSection.style.display = 'none';
+        } else {
+          // Services / Goods&Services => WHT only
+          rowVAT.style.display = 'none';
+          rowWHT.style.display = '';
+        }
+      }
+    }
+
     function updateUI() {
       const vendor = document.getElementById('vendorType').value;
       const invoice = document.getElementById('invoiceType').value;
 
-      // 1) VAT selector logic (Non-PKP & Individual => VAT 0, frozen)
+      // VAT logic
       const vatSel = document.getElementById('vatTariff');
       if (vendor === 'non_pkp' || vendor === 'individual') {
         vatSel.value = "0";
@@ -795,58 +760,46 @@
       }
       handleVatChange();
 
-      // 2) WHT freezing logic:
-      // - Previously "Goods" froze WHT for everyone.
-      // - Update: keep Goods frozen ONLY for corporate vendors.
-      //   Individual + Goods is allowed (needed for "Tax base WHT only" remark).
+      // Checkbox ONLY for PKP
+      const diffWrap = document.getElementById('diffBaseWrapper');
+      const checkDiff = document.getElementById('checkDiffBase');
+      const groupOther = document.getElementById('groupOtherBase');
+
+      if (vendor === 'pkp') {
+        diffWrap.style.display = 'flex';
+        checkDiff.disabled = false;
+        if (checkDiff.checked) groupOther.style.display = 'block';
+        else { groupOther.style.display = 'none'; document.getElementById('otherTaxableAmount').value = ""; }
+      } else {
+        // Hidden + forced OFF
+        diffWrap.style.display = 'none';
+        checkDiff.checked = false;
+        checkDiff.disabled = true;
+        groupOther.style.display = 'none';
+        document.getElementById('otherTaxableAmount').value = "";
+      }
+
+      // WHT logic: Goods (Purchase) => freeze WHT to none (consistent with "No Remarks" and prior v2 behavior)
       const whtSel = document.getElementById('whtType');
       const whtRateIn = document.getElementById('whtRate');
 
-      if (invoice === 'goods' && vendor !== 'individual') {
+      if (invoice === 'goods') {
         whtSel.value = "none";
         whtSel.disabled = true;
         whtSel.classList.add('frozen-input');
 
+        whtRateIn.value = 0;
         whtRateIn.disabled = true;
         whtRateIn.classList.add('frozen-input');
       } else {
         whtSel.disabled = false;
         whtSel.classList.remove('frozen-input');
-        // rate input state handled in updateWHTSettings()
+        // rate enabled/disabled in updateWHTSettings based on type
       }
 
-      // 3) Different base checkbox / Other Taxable Amount behavior
-      const checkDiff = document.getElementById('checkDiffBase');
-      const groupOther = document.getElementById('groupOtherBase');
-
-      // Individual + Services: auto freeze checkbox OFF, and hide other base
-      if (vendor === 'individual' && invoice === 'services') {
-        checkDiff.checked = false;
-        checkDiff.disabled = true;
-        checkDiff.classList.add('frozen-input');
-        groupOther.style.display = 'none';
-        document.getElementById('otherTaxableAmount').value = "";
-      } else {
-        checkDiff.disabled = false;
-        checkDiff.classList.remove('frozen-input');
-
-        if (checkDiff.checked) {
-          groupOther.style.display = 'block';
-        } else {
-          groupOther.style.display = 'none';
-          document.getElementById('otherTaxableAmount').value = "";
-        }
-      }
-
+      updateTaxableHint();
       updateWHTSettings();
       updateRemarkVisibility();
-    }
-
-    function handleVatChange() {
-      const select = document.getElementById('vatTariff');
-      const manualGroup = document.getElementById('vatManualGroup');
-      manualGroup.style.display = (select.value === 'manual') ? 'block' : 'none';
-      calculate();
     }
 
     function updateWHTSettings() {
@@ -855,14 +808,11 @@
       const hint = document.getElementById('whtRateHint');
       const alertMsg = document.getElementById('whtAlert');
 
-      const vendor = document.getElementById('vendorType').value;
-      const invoice = document.getElementById('invoiceType').value;
-
-      // If corporate + Goods, keep frozen (WHT none)
-      if (invoice === 'goods' && vendor !== 'individual') {
-        rateInput.value = 0;
+      // If WHT selector is frozen (goods), do nothing further
+      if (document.getElementById('whtType').disabled) {
         hint.innerText = "-";
         alertMsg.style.display = 'none';
+        calculate();
         return;
       }
 
@@ -904,7 +854,6 @@
       }
 
       calculate();
-      updateRemarkVisibility();
     }
 
     function calculatePPh21Progressive(taxBase50) {
@@ -919,60 +868,20 @@
       return tax;
     }
 
-    function getMode() {
+    function calculate() {
       const vendor = document.getElementById('vendorType').value;
       const invoice = document.getElementById('invoiceType').value;
-      return { vendor, invoice };
-    }
 
-    function updateRemarkVisibility() {
-      const { vendor, invoice } = getMode();
-      const whtType = document.getElementById('whtType').value;
-
-      const rowVAT = document.getElementById('rowBaseVAT');
-      const rowWHT = document.getElementById('rowBaseWHT');
-
-      // VAT-only scenarios => hide WHT base row
-      const vatOnly =
-        (vendor === 'pkp' && invoice === 'goods') ||
-        (vendor === 'non_pkp'); // for all invoice types per feedback
-
-      // WHT-only scenario => hide VAT base row (Individual + Goods)
-      const whtOnly = (vendor === 'individual' && invoice === 'goods');
-
-      // Default: show both
-      rowVAT.style.display = '';
-      rowWHT.style.display = '';
-
-      if (vatOnly) {
-        rowWHT.style.display = 'none';
-      }
-
-      if (whtOnly) {
-        rowVAT.style.display = 'none';
-        rowWHT.style.display = ''; // ensure visible
-      }
-
-      // If user chooses no WHT, hide WHT base row (unless whtOnly case)
-      if (!whtOnly && (whtType === 'none')) {
-        rowWHT.style.display = 'none';
-      }
-    }
-
-    function calculate() {
-      const { vendor, invoice } = getMode();
-
-      // Inputs
       const taxableAmt = getCleanNumber(document.getElementById('inputAmount').value);
       const nonTax = getCleanNumber(document.getElementById('nonTaxAmount').value);
 
       const isDiffBase = document.getElementById('checkDiffBase').checked;
       const otherAmt = isDiffBase ? getCleanNumber(document.getElementById('otherTaxableAmount').value) : 0;
 
-      // ✅ FIX: Amount Before Tax = Taxable + Non-Tax (NOT Taxable + Other)
+      // (kept from your earlier requirement) amount before tax = taxable + non taxable
       const amountBeforeTax = taxableAmt + nonTax;
 
-      // VAT (Base = taxable)
+      // VAT
       const vatSel = document.getElementById('vatTariff').value;
       let vatRate = (vatSel === 'manual')
         ? ((parseFloat(document.getElementById('vatRateInput').value) || 0) / 100)
@@ -980,47 +889,38 @@
 
       const vatVal = taxableAmt * vatRate;
 
-      // WHT base rules
+      // WHT
+      let whtBase = isDiffBase ? otherAmt : taxableAmt;
       const whtType = document.getElementById('whtType').value;
       const whtRateManual = (parseFloat(document.getElementById('whtRate').value) || 0) / 100;
-
-      // ✅ FIX: Individual + Services => force WHT base from taxable amount
-      let whtBase;
-      if (vendor === 'individual' && invoice === 'services') {
-        whtBase = taxableAmt;
-      } else {
-        whtBase = isDiffBase ? otherAmt : taxableAmt;
-      }
 
       let whtVal = 0;
       let noteText = "";
 
-      if (whtType === 'pph21_ind') {
+      // If invoice goods => frozen to none (already), but keep safe:
+      if (invoice === 'goods' || whtType === 'none') {
+        whtVal = 0;
+      } else if (whtType === 'pph21_ind') {
         const pph21Base = whtBase * 0.5;
         whtVal = calculatePPh21Progressive(pph21Base);
         noteText = `* PPh 21: Progressive Rate on 50% of Base (${formatWithCommas(whtBase)} -> ${formatWithCommas(pph21Base)})`;
-      } else if (whtType !== 'none') {
+      } else {
         whtVal = whtBase * whtRateManual;
-        if (isDiffBase && !(vendor === 'individual' && invoice === 'services')) {
-          noteText = `* WHT applied on Other Taxable Amount: ${formatWithCommas(whtBase)}`;
-        }
+        if (isDiffBase && vendor === 'pkp') noteText = `* WHT applied on Other Taxable Amount: ${formatWithCommas(whtBase)}`;
       }
 
-      // ✅ FIX: Total Cash Out uses AmountBeforeTax already includes nonTax
       const totalCashOut = amountBeforeTax + vatVal - whtVal;
 
-      // Render results
       document.getElementById('outAmountBeforeTax').innerText = formatIDR(amountBeforeTax);
       document.getElementById('outVAT').innerText = formatIDR(vatVal);
       document.getElementById('outWHT').innerText = whtVal === 0 ? "0.00" : `(${formatIDR(whtVal)})`;
       document.getElementById('outTotal').innerText = formatIDR(totalCashOut);
 
-      // Remarks values (keep values computed; visibility handled separately)
+      // Remarks values (visibility handled separately)
       document.getElementById('outBaseVAT').innerText = formatIDR(taxableAmt);
       document.getElementById('outBaseWHT').innerText = formatIDR(whtBase);
       document.getElementById('outNonTaxBase').innerText = formatIDR(nonTax);
 
-      // Raw values for copy/export
       document.getElementById('outAmountBeforeTaxRaw').value = Math.round(amountBeforeTax);
       document.getElementById('outVATRaw').value = Math.round(vatVal);
       document.getElementById('outWHTRaw').value = Math.round(whtVal);
@@ -1037,21 +937,28 @@
     function copyTable() {
       const tableMain = document.getElementById('resultTableMain');
       const tableRemark = document.getElementById('resultTableRemark');
+      const remarkSectionVisible = document.getElementById('remarkSection').style.display !== 'none';
 
       const tempDiv = document.createElement('div');
 
-      // Clone remark table but keep only visible rows (per feedback)
-      const remarkClone = tableRemark.cloneNode(true);
-      Array.from(remarkClone.querySelectorAll('tr')).forEach(tr => {
-        if (tr.style && tr.style.display === 'none') tr.remove();
-      });
+      // clone remark table but keep only visible rows
+      let remarkHTML = "";
+      if (remarkSectionVisible) {
+        const remarkClone = tableRemark.cloneNode(true);
+        Array.from(remarkClone.querySelectorAll('tr')).forEach(tr => {
+          if (tr.style && tr.style.display === 'none') tr.remove();
+        });
+        remarkHTML = `
+          <tr><td colspan="2" style="border:none; height:20px;"></td></tr>
+          <tr><td colspan="2" style="font-weight:bold; border:none;">Remark :</td></tr>
+          ${remarkClone.innerHTML}
+        `;
+      }
 
       tempDiv.innerHTML = `
         <table border="1" style="border-collapse: collapse; width: 100%;">
           ${tableMain.innerHTML}
-          <tr><td colspan="2" style="border:none; height:20px;"></td></tr>
-          <tr><td colspan="2" style="font-weight:bold; border:none;">Remark :</td></tr>
-          ${remarkClone.innerHTML}
+          ${remarkHTML}
         </table>`;
 
       const btns = tempDiv.getElementsByTagName('button');
@@ -1078,17 +985,15 @@
     function exportToExcel() {
       const wb = XLSX.utils.book_new();
 
+      const vendor = document.getElementById('vendorType').value;
+      const invoice = document.getElementById('invoiceType').value;
+
       const vendorText = document.getElementById('vendorType').options[document.getElementById('vendorType').selectedIndex].text;
       const invoiceText = document.getElementById('invoiceType').options[document.getElementById('invoiceType').selectedIndex].text;
 
-      const { vendor, invoice } = getMode();
-      const whtType = document.getElementById('whtType').value;
-
-      const vatOnly =
-        (vendor === 'pkp' && invoice === 'goods') ||
-        (vendor === 'non_pkp');
-
-      const whtOnly = (vendor === 'individual' && invoice === 'goods');
+      const isPKP = vendor === 'pkp';
+      const isNonPKPOrInd = (vendor === 'non_pkp' || vendor === 'individual');
+      const remarkVisible = !(isNonPKPOrInd && invoice === 'goods');
 
       const data = [
         ["Item", "Value"],
@@ -1100,21 +1005,24 @@
         ["VAT", parseInt(document.getElementById('outVATRaw').value)],
         ["WHT", parseInt(document.getElementById('outWHTRaw').value)],
         ["Total Cash Out", parseInt(document.getElementById('outTotalRaw').value)],
-        [""],
-        ["--- REMARK ---", ""]
       ];
 
-      // Only export relevant remark lines (matches UI)
-      if (!whtOnly) data.push(["Tax Base VAT", parseInt(document.getElementById('outBaseVATRaw').value)]);
-      if (!vatOnly && whtType !== 'none') data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
-      data.push(["Non-Tax Base Reimbursement", parseInt(document.getElementById('outNonTaxBaseRaw').value)]);
+      if (remarkVisible) {
+        data.push([""], ["--- REMARK ---", ""]);
+        if (isPKP) {
+          data.push(["Tax Base VAT", parseInt(document.getElementById('outBaseVATRaw').value)]);
+          data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
+        } else {
+          data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
+        }
+        data.push(["Non-Tax Base Reimbursement", parseInt(document.getElementById('outNonTaxBaseRaw').value)]);
+      }
 
       const ws = XLSX.utils.aoa_to_sheet(data);
       XLSX.utils.book_append_sheet(wb, ws, "Calculation");
-      XLSX.writeFile(wb, "Modinity_Tax_Calc_v2.3.xlsx");
+      XLSX.writeFile(wb, "Modinity_Tax_Calc_v2.4.xlsx");
     }
 
-    // Init
     window.addEventListener('DOMContentLoaded', () => {
       applyLanguage();
       handleVendorChange();
