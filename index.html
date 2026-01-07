@@ -81,7 +81,6 @@
     }
 
     .app-shell { max-width: 1040px; margin: 0 auto; display: grid; gap: 18px; }
-
     .topbar {
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
       padding: 16px 18px; border: 1px solid var(--border);
@@ -93,7 +92,6 @@
     [data-theme="dark"] .topbar { background: rgba(18, 24, 33, 0.7); }
 
     .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-
     .logo {
       width: 40px; height: 40px; border-radius: 12px;
       background: linear-gradient(135deg, var(--brand), var(--brand-2));
@@ -316,7 +314,7 @@
         <div class="logo">M</div>
         <div style="min-width:0;">
           <h1 id="txtBrandTitle">Modinity Group · Tax Calculator</h1>
-          <div class="sub" id="txtBrandSub">v2.4 · PR Form Helper</div>
+          <div class="sub" id="txtBrandSub">v2.5 · PR Form Helper</div>
         </div>
       </div>
 
@@ -375,7 +373,6 @@
               <div class="hint" id="hintTaxable">Base amount for tax calculation (Standard VAT Base).</div>
             </div>
 
-            <!-- Checkbox wrapper (ONLY for PKP; hidden for others) -->
             <div id="diffBaseWrapper" class="checkbox-wrapper">
               <input type="checkbox" id="checkDiffBase" onchange="updateUI(); calculate();">
               <label for="checkDiffBase" id="lblDiffBase">VAT and WHT have different tax bases</label>
@@ -510,7 +507,6 @@
                 </tr>
               </table>
 
-              <!-- Remark section (can be hidden entirely) -->
               <div class="remark-separator" id="remarkSection">
                 <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
                   <span id="kpiRemark" style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;">Remark :</span>
@@ -528,6 +524,8 @@
                       </div>
                     </td>
                   </tr>
+
+                  <!-- Tax team revision: PKP + GOODS should NOT show WHT base in Remarks -->
                   <tr id="rowBaseWHT">
                     <th id="thBaseWHT">Tax Base WHT</th>
                     <td>
@@ -539,6 +537,7 @@
                       </div>
                     </td>
                   </tr>
+
                   <tr id="rowNonTaxBase">
                     <th id="thNonTaxBase">Non-Tax Base Reimbursement</th>
                     <td>
@@ -684,11 +683,8 @@
       const vendor = document.getElementById('vendorType').value;
       const whtSel = document.getElementById('whtType');
 
-      if (vendor === 'individual') {
-        whtSel.value = "pph21_ind";
-      } else {
-        if (whtSel.value === "pph21_ind") whtSel.value = "pph23_gen";
-      }
+      if (vendor === 'individual') whtSel.value = "pph21_ind";
+      else if (whtSel.value === "pph21_ind") whtSel.value = "pph23_gen";
 
       updateUI();
       calculate();
@@ -704,13 +700,14 @@
       const vendor = document.getElementById('vendorType').value;
       const hintEl = document.getElementById('hintTaxable');
       const t = i18n[currentLang];
-
-      // Per your note: Non PKP & Individual => Standard WHT Base (not VAT base)
-      if (vendor === 'pkp') hintEl.innerText = t.hintTaxableVAT;
-      else hintEl.innerText = t.hintTaxableWHT;
+      hintEl.innerText = (vendor === 'pkp') ? t.hintTaxableVAT : t.hintTaxableWHT;
     }
 
-    // Remarks matrix per screenshot
+    // UPDATED MATRIX:
+    // - PKP + Goods => Remarks show ONLY Tax Base VAT (remove Tax Base WHT)
+    // - PKP + Services or Goods&Services => show VAT + WHT
+    // - NonPKP/Individual + Goods => No Remarks
+    // - NonPKP/Individual + Services or Goods&Services => WHT only
     function updateRemarkVisibility() {
       const vendor = document.getElementById('vendorType').value;
       const invoice = document.getElementById('invoiceType').value;
@@ -719,24 +716,27 @@
       const rowVAT = document.getElementById('rowBaseVAT');
       const rowWHT = document.getElementById('rowBaseWHT');
 
-      // Defaults
+      // defaults
       remarkSection.style.display = 'block';
       rowVAT.style.display = '';
       rowWHT.style.display = '';
 
       const isPKP = vendor === 'pkp';
-      const isNonPKPOrInd = vendor === 'non_pkp' || vendor === 'individual';
+      const isNonPKPOrInd = (vendor === 'non_pkp' || vendor === 'individual');
 
       if (isPKP) {
-        // PKP: Services/Goods/Goods&Services => VAT + WHT (always show both)
-        rowVAT.style.display = '';
-        rowWHT.style.display = '';
+        if (invoice === 'goods') {
+          // Tax team revision
+          rowVAT.style.display = '';
+          rowWHT.style.display = 'none';
+        } else {
+          rowVAT.style.display = '';
+          rowWHT.style.display = '';
+        }
       } else if (isNonPKPOrInd) {
         if (invoice === 'goods') {
-          // Non PKP & Individual + Goods (Purchase) => No Remarks
           remarkSection.style.display = 'none';
         } else {
-          // Services / Goods&Services => WHT only
           rowVAT.style.display = 'none';
           rowWHT.style.display = '';
         }
@@ -747,7 +747,7 @@
       const vendor = document.getElementById('vendorType').value;
       const invoice = document.getElementById('invoiceType').value;
 
-      // VAT logic
+      // VAT
       const vatSel = document.getElementById('vatTariff');
       if (vendor === 'non_pkp' || vendor === 'individual') {
         vatSel.value = "0";
@@ -760,7 +760,7 @@
       }
       handleVatChange();
 
-      // Checkbox ONLY for PKP
+      // Checkbox only PKP
       const diffWrap = document.getElementById('diffBaseWrapper');
       const checkDiff = document.getElementById('checkDiffBase');
       const groupOther = document.getElementById('groupOtherBase');
@@ -771,7 +771,6 @@
         if (checkDiff.checked) groupOther.style.display = 'block';
         else { groupOther.style.display = 'none'; document.getElementById('otherTaxableAmount').value = ""; }
       } else {
-        // Hidden + forced OFF
         diffWrap.style.display = 'none';
         checkDiff.checked = false;
         checkDiff.disabled = true;
@@ -779,10 +778,9 @@
         document.getElementById('otherTaxableAmount').value = "";
       }
 
-      // WHT logic: Goods (Purchase) => freeze WHT to none (consistent with "No Remarks" and prior v2 behavior)
+      // WHT: goods purchase -> freeze none
       const whtSel = document.getElementById('whtType');
       const whtRateIn = document.getElementById('whtRate');
-
       if (invoice === 'goods') {
         whtSel.value = "none";
         whtSel.disabled = true;
@@ -794,7 +792,6 @@
       } else {
         whtSel.disabled = false;
         whtSel.classList.remove('frozen-input');
-        // rate enabled/disabled in updateWHTSettings based on type
       }
 
       updateTaxableHint();
@@ -808,7 +805,6 @@
       const hint = document.getElementById('whtRateHint');
       const alertMsg = document.getElementById('whtAlert');
 
-      // If WHT selector is frozen (goods), do nothing further
       if (document.getElementById('whtType').disabled) {
         hint.innerText = "-";
         alertMsg.style.display = 'none';
@@ -816,7 +812,6 @@
         return;
       }
 
-      // Default enabled
       rateInput.disabled = false;
       rateInput.classList.remove('frozen-input');
       rateInput.classList.remove('ask-tax-team');
@@ -878,10 +873,8 @@
       const isDiffBase = document.getElementById('checkDiffBase').checked;
       const otherAmt = isDiffBase ? getCleanNumber(document.getElementById('otherTaxableAmount').value) : 0;
 
-      // (kept from your earlier requirement) amount before tax = taxable + non taxable
       const amountBeforeTax = taxableAmt + nonTax;
 
-      // VAT
       const vatSel = document.getElementById('vatTariff').value;
       let vatRate = (vatSel === 'manual')
         ? ((parseFloat(document.getElementById('vatRateInput').value) || 0) / 100)
@@ -889,7 +882,6 @@
 
       const vatVal = taxableAmt * vatRate;
 
-      // WHT
       let whtBase = isDiffBase ? otherAmt : taxableAmt;
       const whtType = document.getElementById('whtType').value;
       const whtRateManual = (parseFloat(document.getElementById('whtRate').value) || 0) / 100;
@@ -897,7 +889,6 @@
       let whtVal = 0;
       let noteText = "";
 
-      // If invoice goods => frozen to none (already), but keep safe:
       if (invoice === 'goods' || whtType === 'none') {
         whtVal = 0;
       } else if (whtType === 'pph21_ind') {
@@ -916,7 +907,6 @@
       document.getElementById('outWHT').innerText = whtVal === 0 ? "0.00" : `(${formatIDR(whtVal)})`;
       document.getElementById('outTotal').innerText = formatIDR(totalCashOut);
 
-      // Remarks values (visibility handled separately)
       document.getElementById('outBaseVAT').innerText = formatIDR(taxableAmt);
       document.getElementById('outBaseWHT').innerText = formatIDR(whtBase);
       document.getElementById('outNonTaxBase').innerText = formatIDR(nonTax);
@@ -937,13 +927,12 @@
     function copyTable() {
       const tableMain = document.getElementById('resultTableMain');
       const tableRemark = document.getElementById('resultTableRemark');
-      const remarkSectionVisible = document.getElementById('remarkSection').style.display !== 'none';
+      const remarkVisible = document.getElementById('remarkSection').style.display !== 'none';
 
       const tempDiv = document.createElement('div');
 
-      // clone remark table but keep only visible rows
       let remarkHTML = "";
-      if (remarkSectionVisible) {
+      if (remarkVisible) {
         const remarkClone = tableRemark.cloneNode(true);
         Array.from(remarkClone.querySelectorAll('tr')).forEach(tr => {
           if (tr.style && tr.style.display === 'none') tr.remove();
@@ -991,9 +980,15 @@
       const vendorText = document.getElementById('vendorType').options[document.getElementById('vendorType').selectedIndex].text;
       const invoiceText = document.getElementById('invoiceType').options[document.getElementById('invoiceType').selectedIndex].text;
 
+      // remark visibility per the updated matrix
       const isPKP = vendor === 'pkp';
       const isNonPKPOrInd = (vendor === 'non_pkp' || vendor === 'individual');
       const remarkVisible = !(isNonPKPOrInd && invoice === 'goods');
+
+      const showWHTBaseInRemark =
+        (isPKP && invoice !== 'goods') || (!isPKP && remarkVisible); // PKP+goods => hide WHT base
+      const showVATBaseInRemark =
+        (isPKP) && remarkVisible; // PKP always shows VAT base if remark visible
 
       const data = [
         ["Item", "Value"],
@@ -1009,18 +1004,14 @@
 
       if (remarkVisible) {
         data.push([""], ["--- REMARK ---", ""]);
-        if (isPKP) {
-          data.push(["Tax Base VAT", parseInt(document.getElementById('outBaseVATRaw').value)]);
-          data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
-        } else {
-          data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
-        }
+        if (showVATBaseInRemark) data.push(["Tax Base VAT", parseInt(document.getElementById('outBaseVATRaw').value)]);
+        if (showWHTBaseInRemark) data.push(["Tax Base WHT", parseInt(document.getElementById('outBaseWHTRaw').value)]);
         data.push(["Non-Tax Base Reimbursement", parseInt(document.getElementById('outNonTaxBaseRaw').value)]);
       }
 
       const ws = XLSX.utils.aoa_to_sheet(data);
       XLSX.utils.book_append_sheet(wb, ws, "Calculation");
-      XLSX.writeFile(wb, "Modinity_Tax_Calc_v2.4.xlsx");
+      XLSX.writeFile(wb, "Modinity_Tax_Calc_v2.5.xlsx");
     }
 
     window.addEventListener('DOMContentLoaded', () => {
