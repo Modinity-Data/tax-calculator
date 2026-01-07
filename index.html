@@ -1,578 +1,383 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Modinity Group | Tax Calculator v2.0</title>
 
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#111111',
+              dark: '#0b0f14',
+              surface: '#ffffff',
+              surfaceDark: '#1e293b'
+            },
+            excel: {
+              DEFAULT: '#1d6f42',
+              hover: '#144f2f'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    :root {
-      --bg-body: #f6f7fb;
-      --bg-surface: #ffffff;
-      --bg-soft: rgba(0, 0, 0, 0.03);
-      --text: #0b0f17;
-      --muted: rgba(11, 15, 23, 0.62);
-      --border: rgba(11, 15, 23, 0.12);
-      --border-strong: rgba(11, 15, 23, 0.18);
-
-      --brand: #111111;
-      --brand-2: #2b2b2b;
-
-      --danger: #dc3545;
-      --danger-bg: rgba(220, 53, 69, 0.08);
-
-      --excel-green: #1d6f42;
-      --excel-green-hover: #144f2f;
-
-      --shadow: 0 18px 50px rgba(11, 15, 23, 0.08);
-      --shadow-soft: 0 10px 30px rgba(11, 15, 23, 0.06);
-
-      --radius: 14px;
-      --focus: 0 0 0 4px rgba(17, 17, 17, 0.18);
-
-      --disabled-bg: #000000;
-      --disabled-text: #666666;
-
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-
-    [data-theme="dark"] {
-      --bg-body: #0b0f14;
-      --bg-surface: #121821;
-      --bg-soft: rgba(255, 255, 255, 0.05);
-      --text: rgba(255, 255, 255, 0.92);
-      --muted: rgba(255, 255, 255, 0.62);
-      --border: rgba(255, 255, 255, 0.12);
-      --border-strong: rgba(255, 255, 255, 0.18);
-
-      --brand: #ffffff;
-      --brand-2: rgba(255, 255, 255, 0.85);
-
-      --excel-green: #21a366;
-      --excel-green-hover: #1b8553;
-
-      --danger: #ff6b6b;
-      --danger-bg: rgba(255, 107, 107, 0.12);
-
-      --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
-
-      --focus: 0 0 0 4px rgba(255, 255, 255, 0.18);
-
-      --disabled-bg: #000000;
-      --disabled-text: #444444;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-
+    /* Custom pattern background that Tailwind doesn't do natively easily */
     body {
-      font-family: var(--sans);
-      background: radial-gradient(1200px 600px at 10% 0%, rgba(17,17,17,0.06), transparent 55%),
-                  radial-gradient(900px 500px at 90% 20%, rgba(17,17,17,0.05), transparent 55%),
-                  var(--bg-body);
-      color: var(--text);
-      margin: 0;
-      padding: 32px 18px;
-      transition: background-color 0.25s ease, color 0.25s ease;
+      background-color: #f8fafc; /* slate-50 */
+      background-image: 
+        radial-gradient(at 10% 0%, rgba(17,17,17,0.03) 0px, transparent 50%),
+        radial-gradient(at 90% 20%, rgba(17,17,17,0.03) 0px, transparent 50%);
     }
-
-    .app-shell { max-width: 1040px; margin: 0 auto; display: grid; gap: 18px; }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      padding: 16px 18px; border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-soft);
+    .dark body {
+      background-color: #0f172a; /* slate-900 */
+      background-image: 
+        radial-gradient(at 10% 0%, rgba(255,255,255,0.03) 0px, transparent 50%),
+        radial-gradient(at 90% 20%, rgba(255,255,255,0.03) 0px, transparent 50%);
     }
-    [data-theme="dark"] .topbar { background: rgba(18, 24, 33, 0.7); }
+    
+    /* Utility for hiding scrollbar if needed, though not strictly used here */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .logo {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      display: grid; place-items: center;
-      color: var(--bg-surface); font-weight: 900; user-select: none;
-    }
-    [data-theme="dark"] .logo { color: #121821; }
-
-    .brand h1 {
-      margin: 0; font-size: 16px; line-height: 1.2;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
-
-    .actions { display: flex; align-items: center; gap: 8px; }
-
-    .icon-toggle {
-      cursor: pointer;
-      border: 1px solid var(--border-strong);
-      background: var(--bg-surface);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .icon-toggle:hover { transform: translateY(-1px); }
-    .icon-toggle span { font-size: 16px; line-height: 1; }
-
-    .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; align-items: start; }
-
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .card-header .title {
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-    }
-    .card-header .hintline { font-size: 12px; color: var(--muted); }
-
-    .card-body { padding: 18px; }
-
-    .section { padding: 14px 0 6px; border-top: 1px dashed var(--border); margin-top: 12px; }
-    .section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
-
-    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-    .section-title h3 { margin: 0; font-size: 13px; }
-
-    .badge {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .form-group { margin-bottom: 14px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .control { position: relative; }
-
-    select, input {
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 14px;
-      background-color: var(--bg-surface);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s, background-color 0.2s;
-    }
-    select:focus, input:focus { border-color: var(--border-strong); box-shadow: var(--focus); }
-
-    .prefix {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--muted);
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 5px 8px;
-      pointer-events: none;
-      z-index: 2;
-    }
-    .with-prefix input { padding-left: 76px; }
-
-    input:disabled, select:disabled, .frozen-input {
-      background-color: var(--disabled-bg) !important;
-      color: var(--disabled-text) !important;
-      cursor: not-allowed;
-      border-color: #333;
-    }
-
-    .ask-tax-team {
-      background-color: var(--danger-bg) !important;
-      border-color: var(--danger) !important;
-      color: var(--danger) !important;
-      font-weight: 900;
-    }
-
-    .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
-    .alert-msg { display: none; color: var(--danger); font-size: 11px; font-weight: 900; margin-top: 6px; }
-
-    .checkbox-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding: 10px;
-      background: var(--bg-soft);
-      border-radius: 8px;
-    }
-    .checkbox-wrapper input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--brand); }
-    .checkbox-wrapper label { margin: 0; color: var(--text); cursor: pointer; }
-
-    .results-sticky { position: sticky; top: 18px; }
-    .results-surface { background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent 45%), var(--bg-surface); }
-    .results-panel { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 12px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    th { text-align: left; color: var(--muted); font-weight: 800; width: 55%; font-size: 12px; }
-    td { text-align: right; font-family: var(--mono); font-weight: 800; color: var(--text); }
-
-    .total-row th, .total-row td { border-bottom: none; padding-top: 16px; }
-    .total-row { border-top: 1px solid var(--border-strong); }
-    .total-row td { font-size: 18px; }
-    .wht-row { color: #d9534f; }
-    [data-theme="dark"] .wht-row { color: #ff6b6b; }
-
-    .remark-separator { border-top: 1px solid var(--border-strong); margin-top: 16px; padding-top: 16px; }
-
-    .val-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-    .mini-copy-btn {
-      background: transparent; border: 1px solid var(--border); border-radius: 6px;
-      color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center;
-      transition: all 0.2s; width: 24px; height: 24px;
-    }
-    .mini-copy-btn:hover { background: var(--bg-surface); color: var(--brand); border-color: var(--brand); }
-    .mini-copy-btn svg { width: 14px; height: 14px; fill: currentColor; }
-
-    #logicNote { margin-top: 12px; font-size: 11px; color: var(--muted); font-style: italic; }
-
-    .btn-shared {
-      width: 100%; padding: 12px 14px; border-radius: 14px; border: none;
-      cursor: pointer; font-size: 13px; font-weight: 900; letter-spacing: 0.5px;
-      text-transform: uppercase; display: flex; align-items: center; justify-content: center;
-      gap: 10px; margin-top: 14px; transition: transform 0.1s;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.16);
-    }
-    .btn-shared:active { transform: translateY(1px); }
-    .btn-shared svg { fill: currentColor; width: 18px; height: 18px; }
-
-    .copy-btn { background: var(--brand); color: var(--bg-surface); }
-    [data-theme="dark"] .copy-btn { background: #ffffff; color: #0b0f14; }
-
-    .excel-btn { background: var(--excel-green); color: #fff; margin-top: 10px; }
-    .excel-btn:hover { background: var(--excel-green-hover); }
-
-    .toast {
-      position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
-      background: rgba(0,0,0,0.86); color: white; padding: 10px 14px;
-      border-radius: 999px; font-size: 12px; font-weight: 800; opacity: 0;
-      pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 9999;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: 1fr; }
-      .results-sticky { position: static; }
-      body { padding: 22px 14px; }
-    }
+    /* Transition for specific elements */
+    .trans-all { transition: all 0.2s ease-in-out; }
   </style>
 </head>
 
-<body>
-  <div class="app-shell">
+<body class="text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen py-6 px-4 md:py-10 md:px-6">
 
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo">M</div>
-        <div style="min-width:0;">
-          <h1 id="txtBrandTitle">Modinity Group · Tax Calculator</h1>
-          <div class="sub" id="txtBrandSub">v2.5 · PR Form Helper</div>
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <div class="sticky top-4 z-40 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-4 w-full sm:w-auto">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 flex items-center justify-center shadow-lg shrink-0">
+          <span class="text-white dark:text-slate-900 font-black text-xl select-none">M</span>
+        </div>
+        <div>
+          <h1 id="txtBrandTitle" class="font-bold text-lg leading-tight tracking-tight">Modinity Group · Tax Calculator</h1>
+          <div id="txtBrandSub" class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">v2.5 · PR Form Helper</div>
         </div>
       </div>
 
-      <div class="actions">
-        <button class="icon-toggle" onclick="toggleLanguage()" id="langBtn" title="Switch Language">
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button onclick="toggleLanguage()" id="langBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-sm font-bold transition-all border border-slate-200 dark:border-slate-600 shadow-sm active:scale-95">
           <span id="flagIcon">🇬🇧</span> <span id="langText">EN</span>
         </button>
-        <button class="icon-toggle" onclick="toggleTheme()" id="themeBtn" title="Switch Theme">
+        <button onclick="toggleTheme()" id="themeBtn" class="flex items-center justify-center w-10 h-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-all border border-slate-200 dark:border-slate-600 shadow-sm active:scale-95">
           <span>🌙</span>
         </button>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="title" id="headInputs">Config & Inputs</div>
-          <div class="hintline" id="subInputs">Select Vendor Type & Invoice first</div>
-        </div>
-        <div class="card-body">
-
-          <div class="section">
-            <div class="form-row">
-              <div class="form-group">
-                <label id="lblVendorType">Vendor Type</label>
-                <select id="vendorType" onchange="handleVendorChange()">
-                  <option value="pkp">Company (PKP)</option>
-                  <option value="non_pkp">Company (Non-PKP)</option>
-                  <option value="individual">Personal / Individual</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label id="lblInvoiceType">Invoice Type</label>
-                <select id="invoiceType" onchange="updateUI(); calculate();">
-                  <option value="services">Services</option>
-                  <option value="goods">Goods (Purchase Only)</option>
-                  <option value="goods_services">Goods & Services</option>
-                </select>
-              </div>
-            </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <div class="lg:col-span-7 space-y-6">
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-xl overflow-hidden">
+          
+          <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+            <div id="headInputs" class="text-sm font-black text-slate-400 uppercase tracking-widest">Config & Inputs</div>
+            <div id="subInputs" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Select Vendor Type & Invoice first</div>
           </div>
 
-          <div class="section">
-            <div class="section-title">
-              <h3 id="secAmount">Amounts</h3>
-              <span class="badge" id="bdgBase">Tax Bases</span>
-            </div>
+          <div class="p-6 space-y-8">
 
-            <div class="form-group">
-              <label id="lblTaxable">Taxable Amount</label>
-              <div class="control with-prefix">
-                <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000"
-                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="space-y-2">
+                <label id="lblVendorType" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Vendor Type</label>
+                <div class="relative">
+                  <select id="vendorType" onchange="handleVendorChange()" class="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent block p-3 pr-8 font-semibold transition-all shadow-sm">
+                    <option value="pkp">Company (PKP)</option>
+                    <option value="non_pkp">Company (Non-PKP)</option>
+                    <option value="individual">Personal / Individual</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                  </div>
+                </div>
               </div>
-              <div class="hint" id="hintTaxable">Base amount for tax calculation (Standard VAT Base).</div>
-            </div>
-
-            <div id="diffBaseWrapper" class="checkbox-wrapper">
-              <input type="checkbox" id="checkDiffBase" onchange="updateUI(); calculate();">
-              <label for="checkDiffBase" id="lblDiffBase">VAT and WHT have different tax bases</label>
-            </div>
-
-            <div class="form-group" id="groupOtherBase" style="display:none;">
-              <label id="lblOtherBase">Other Taxable Amount</label>
-              <div class="control with-prefix">
-                <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="otherTaxableAmount" placeholder="e.g. 5,000,000"
-                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
-              </div>
-              <div class="hint" id="hintOther">Used as the WHT Tax Base.</div>
-            </div>
-
-            <div class="form-group">
-              <label id="lblNonTax">Non-Taxable Amount</label>
-              <div class="control with-prefix">
-                <span class="prefix">IDR</span>
-                <input type="text" inputmode="numeric" id="nonTaxAmount" value="0"
-                  onkeyup="formatCurrencyInput(this)" oninput="calculate()">
+              <div class="space-y-2">
+                <label id="lblInvoiceType" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Invoice Type</label>
+                <div class="relative">
+                  <select id="invoiceType" onchange="updateUI(); calculate();" class="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent block p-3 pr-8 font-semibold transition-all shadow-sm">
+                    <option value="services">Services</option>
+                    <option value="goods">Goods (Purchase Only)</option>
+                    <option value="goods_services">Goods & Services</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <hr class="border-slate-100 dark:border-slate-700 border-dashed" />
+
+            <div class="space-y-5">
+              <div class="flex items-center justify-between">
+                <h3 id="secAmount" class="font-bold text-slate-800 dark:text-white">Amounts</h3>
+                <span id="bdgBase" class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-[10px] font-black px-2 py-1 rounded-md uppercase border border-slate-200 dark:border-slate-600">Tax Bases</span>
+              </div>
+
+              <div class="space-y-2">
+                <label class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wide">
+                  <span id="lblTaxable">Taxable Amount</span>
+                </label>
+                <div class="relative group">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-black px-2 py-1 rounded-md">IDR</span>
+                  </div>
+                  <input type="text" inputmode="numeric" id="inputAmount" placeholder="e.g. 10,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()"
+                    class="block w-full pl-16 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none font-mono text-lg font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all" />
+                </div>
+                <div id="hintTaxable" class="text-[11px] font-medium text-slate-400">Base amount for tax calculation (Standard VAT Base).</div>
+              </div>
+
+              <div id="diffBaseWrapper" class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700/50 transition-all">
+                <div class="flex items-center h-5">
+                  <input type="checkbox" id="checkDiffBase" onchange="updateUI(); calculate();" class="w-5 h-5 text-slate-900 bg-white border-slate-300 rounded focus:ring-slate-900 dark:focus:ring-slate-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 transition-colors cursor-pointer">
+                </div>
+                <label for="checkDiffBase" id="lblDiffBase" class="text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">VAT and WHT have different tax bases</label>
+              </div>
+
+              <div id="groupOtherBase" style="display:none;" class="space-y-2 animate-fade-in-down">
+                <label id="lblOtherBase" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Other Taxable Amount</label>
+                <div class="relative group">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-black px-2 py-1 rounded-md">IDR</span>
+                  </div>
+                  <input type="text" inputmode="numeric" id="otherTaxableAmount" placeholder="e.g. 5,000,000" onkeyup="formatCurrencyInput(this)" oninput="calculate()"
+                    class="block w-full pl-16 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none font-mono text-lg font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all" />
+                </div>
+                <div id="hintOther" class="text-[11px] font-medium text-slate-400">Used as the WHT Tax Base.</div>
+              </div>
+
+              <div class="space-y-2">
+                <label id="lblNonTax" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Non-Taxable Amount</label>
+                <div class="relative group">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-black px-2 py-1 rounded-md">IDR</span>
+                  </div>
+                  <input type="text" inputmode="numeric" id="nonTaxAmount" value="0" onkeyup="formatCurrencyInput(this)" oninput="calculate()"
+                    class="block w-full pl-16 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none font-mono text-lg font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all" />
+                </div>
+              </div>
+            </div>
+
+            <hr class="border-slate-100 dark:border-slate-700 border-dashed" />
+
+            <div class="space-y-5">
+              <h3 id="secVat" class="font-bold text-slate-800 dark:text-white">VAT (PPN)</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label id="lblVatTariff" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">VAT Tariff</label>
+                  <div class="relative">
+                    <select id="vatTariff" onchange="handleVatChange()" class="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent block p-3 pr-8 font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                      <option value="0.11" selected>11% (Standard)</option>
+                      <option value="0.011">1.1% (Freight/Shipping)</option>
+                      <option value="0">0% (No VAT)</option>
+                      <option value="manual">Manual Input</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                    </div>
+                  </div>
+                </div>
+                <div id="vatManualGroup" style="display:none;" class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Custom VAT Rate (%)</label>
+                  <input type="number" id="vatRateInput" value="0" step="0.01" oninput="calculate()" class="block w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none font-mono font-bold text-slate-800 dark:text-slate-100 shadow-sm" />
+                </div>
+              </div>
+            </div>
+
+            <hr class="border-slate-100 dark:border-slate-700 border-dashed" />
+
+            <div class="space-y-5">
+              <h3 id="secWht" class="font-bold text-slate-800 dark:text-white">Withholding (PPh)</h3>
+              <div class="space-y-4">
+                <div class="space-y-2">
+                  <label id="lblWhtType" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">WHT Type</label>
+                  <div class="relative">
+                    <select id="whtType" onchange="updateWHTSettings()" class="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent block p-3 pr-8 font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                      <option value="none">Non-WHT / No WHT</option>
+                      <option value="pph23_gen" selected>WHT Art. 23 Payable - General</option>
+                      <option value="pph23_royalty">WHT Art. 23 Payable – Royalty/Interest</option>
+                      <option value="pph42_rent">WHT Final – Rental Store/Office</option>
+                      <option value="pph_final_const">WHT Final – Construction & Others</option>
+                      <option value="pph21_ind">WHT Art. 21 Payable - Non Employee</option>
+                      <option value="pph26">WHT Art. 26 Payable – Overseas</option>
+                      <option value="manual">Manual Input</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label id="lblWhtRate" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">WHT Rate (%)</label>
+                  <input type="number" id="whtRate" value="2" step="0.01" oninput="calculate()" class="block w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none font-mono text-lg font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
+                  
+                  <div class="flex items-center gap-2 mt-1">
+                    <div class="text-[11px] font-medium text-slate-400" id="whtRateHint">Standard Rate: 2%</div>
+                    <div class="hidden text-[11px] font-black text-rose-500 uppercase animate-pulse" id="whtAlert">⚠️ RATE VARIES! PLEASE ASK TAX TEAM.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          <div class="section">
-            <div class="section-title">
-              <h3 id="secVat">VAT (PPN)</h3>
-            </div>
-            <div class="form-group">
-              <label id="lblVatTariff">VAT Tariff</label>
-              <div class="control">
-                <select id="vatTariff" onchange="handleVatChange()">
-                  <option value="0.11" selected>11% (Standard)</option>
-                  <option value="0.011">1.1% (Freight/Shipping)</option>
-                  <option value="0">0% (No VAT)</option>
-                  <option value="manual">Manual Input</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group" id="vatManualGroup" style="display:none;">
-              <label>Custom VAT Rate (%)</label>
-              <input type="number" id="vatRateInput" value="0" step="0.01" oninput="calculate()">
-            </div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">
-              <h3 id="secWht">Withholding (PPh)</h3>
-            </div>
-            <div class="form-group">
-              <label id="lblWhtType">WHT Type</label>
-              <div class="control">
-                <select id="whtType" onchange="updateWHTSettings()">
-                  <option value="none">Non-WHT / No WHT</option>
-                  <option value="pph23_gen" selected>WHT Art. 23 Payable - General</option>
-                  <option value="pph23_royalty">WHT Art. 23 Payable – Royalty/Interest</option>
-                  <option value="pph42_rent">WHT Final – Rental Store/Office</option>
-                  <option value="pph_final_const">WHT Final – Construction & Others</option>
-                  <option value="pph21_ind">WHT Art. 21 Payable - Non Employee</option>
-                  <option value="pph26">WHT Art. 26 Payable – Overseas</option>
-                  <option value="manual">Manual Input</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label id="lblWhtRate">WHT Rate (%)</label>
-              <div class="control">
-                <input type="number" id="whtRate" value="2" step="0.01" oninput="calculate()">
-              </div>
-              <div class="hint" id="whtRateHint">Standard Rate: 2%</div>
-              <div class="alert-msg" id="whtAlert">⚠️ RATE VARIES! PLEASE ASK TAX TEAM.</div>
-            </div>
-          </div>
-
         </div>
       </div>
 
-      <div class="results-sticky">
-        <div class="card results-surface">
-          <div class="card-header">
-            <div class="title" id="headResult">Result Preview</div>
-            <div class="hintline" id="subResult">Result Preview</div>
-          </div>
-          <div class="card-body">
-            <div class="results-panel">
+      <div class="lg:col-span-5 relative">
+        <div class="sticky top-28 space-y-4">
+          
+          <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl overflow-hidden">
+            
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+              <div id="headResult" class="text-sm font-black text-slate-400 uppercase tracking-widest">Result Preview</div>
+              <div id="subResult" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Result Preview</div>
+            </div>
 
-              <table id="resultTableMain">
-                <tr>
-                  <th id="thAmountBeforeTax">Amount before tax</th>
-                  <td>
-                    <div class="val-container">
-                      <span id="outAmountBeforeTax">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outAmountBeforeTaxRaw')" title="Copy Value">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th id="thVat">VAT</th>
-                  <td>
-                    <div class="val-container">
-                      <span id="outVAT">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outVATRaw')" title="Copy Value">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th id="thWht">WHT</th>
-                  <td class="wht-row">
-                    <div class="val-container">
-                      <span id="outWHT">(0)</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outWHTRaw')" title="Copy Value">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr class="total-row">
-                  <th id="thTotal">Total Cash Out</th>
-                  <td>
-                    <div class="val-container">
-                      <span id="outTotal">0</span>
-                      <button class="mini-copy-btn" onclick="copyValue('outTotalRaw')" title="Copy Value">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <div class="remark-separator" id="remarkSection">
-                <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
-                  <span id="kpiRemark" style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;">Remark :</span>
-                </div>
-
-                <table id="resultTableRemark">
-                  <tr id="rowBaseVAT">
-                    <th id="thBaseVAT">Tax Base VAT</th>
-                    <td>
-                      <div class="val-container">
-                        <span id="outBaseVAT">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outBaseVATRaw')" title="Copy Value">
-                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <!-- Tax team revision: PKP + GOODS should NOT show WHT base in Remarks -->
-                  <tr id="rowBaseWHT">
-                    <th id="thBaseWHT">Tax Base WHT</th>
-                    <td>
-                      <div class="val-container">
-                        <span id="outBaseWHT">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outBaseWHTRaw')" title="Copy Value">
-                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <tr id="rowNonTaxBase">
-                    <th id="thNonTaxBase">Non-Tax Base Reimbursement</th>
-                    <td>
-                      <div class="val-container">
-                        <span id="outNonTaxBase">0</span>
-                        <button class="mini-copy-btn" onclick="copyValue('outNonTaxBaseRaw')" title="Copy Value">
-                          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+            <div class="p-6">
+              
+              <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700 p-1">
+                <table id="resultTableMain" class="w-full text-sm">
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tr class="group hover:bg-white dark:hover:bg-slate-800 transition-colors rounded-lg">
+                      <th id="thAmountBeforeTax" class="text-left py-3 px-4 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase w-1/2">Amount before tax</th>
+                      <td class="text-right py-3 px-4">
+                        <div class="flex items-center justify-end gap-2">
+                          <span id="outAmountBeforeTax" class="font-mono font-bold text-slate-900 dark:text-white">0</span>
+                          <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outAmountBeforeTaxRaw')" title="Copy">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="group hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                      <th id="thVat" class="text-left py-3 px-4 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase">VAT</th>
+                      <td class="text-right py-3 px-4">
+                        <div class="flex items-center justify-end gap-2">
+                          <span id="outVAT" class="font-mono font-bold text-slate-900 dark:text-white">0</span>
+                          <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outVATRaw')" title="Copy">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="group hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                      <th id="thWht" class="text-left py-3 px-4 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase">WHT</th>
+                      <td class="text-right py-3 px-4 text-rose-500 dark:text-rose-400">
+                        <div class="flex items-center justify-end gap-2">
+                          <span id="outWHT" class="font-mono font-bold">(0)</span>
+                          <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outWHTRaw')" title="Copy">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="border-t-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                      <th id="thTotal" class="text-left py-4 px-4 font-black text-slate-800 dark:text-white text-xs uppercase tracking-wide">Total Cash Out</th>
+                      <td class="text-right py-4 px-4">
+                        <div class="flex items-center justify-end gap-2">
+                          <span id="outTotal" class="font-mono font-black text-xl text-slate-900 dark:text-white">0</span>
+                          <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outTotalRaw')" title="Copy">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
 
-              <div id="logicNote"></div>
+              <div id="remarkSection" class="mt-6 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
+                <div class="mb-3">
+                  <span id="kpiRemark" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Remark :</span>
+                </div>
 
-              <button class="btn-shared copy-btn" onclick="copyTable()">
-                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-                <span id="btnCopy">COPY TABLE (FOR PR FORM)</span>
-              </button>
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700 p-1">
+                  <table id="resultTableRemark" class="w-full text-sm">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr id="rowBaseVAT" class="group hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                        <th id="thBaseVAT" class="text-left py-2 px-4 font-bold text-slate-500 dark:text-slate-400 text-[11px]">Tax Base VAT</th>
+                        <td class="text-right py-2 px-4">
+                          <div class="flex items-center justify-end gap-2">
+                            <span id="outBaseVAT" class="font-mono font-bold text-slate-700 dark:text-slate-300">0</span>
+                            <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outBaseVATRaw')" title="Copy">
+                               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr id="rowBaseWHT" class="group hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                        <th id="thBaseWHT" class="text-left py-2 px-4 font-bold text-slate-500 dark:text-slate-400 text-[11px]">Tax Base WHT</th>
+                        <td class="text-right py-2 px-4">
+                          <div class="flex items-center justify-end gap-2">
+                            <span id="outBaseWHT" class="font-mono font-bold text-slate-700 dark:text-slate-300">0</span>
+                            <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outBaseWHTRaw')" title="Copy">
+                               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr id="rowNonTaxBase" class="group hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                        <th id="thNonTaxBase" class="text-left py-2 px-4 font-bold text-slate-500 dark:text-slate-400 text-[11px]">Non-Tax Base Reimbursement</th>
+                        <td class="text-right py-2 px-4">
+                          <div class="flex items-center justify-end gap-2">
+                            <span id="outNonTaxBase" class="font-mono font-bold text-slate-700 dark:text-slate-300">0</span>
+                            <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" onclick="copyValue('outNonTaxBaseRaw')" title="Copy">
+                               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              <button class="btn-shared excel-btn" onclick="exportToExcel()">
-                <svg viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H2.83Q2.5 20.75 2.26 20.5 2 20.26 2 19.92V4.08Q2 3.74 2.26 3.5 2.5 3.25 2.83 3.25ZM11 13V19H20V13ZM4 13V19H9V13ZM11 5V11H20V5ZM4 5V11H9V5Z" /></svg>
-                <span id="btnExcel">EXPORT TO EXCEL</span>
-              </button>
+              <div id="logicNote" class="mt-3 text-[10px] italic text-slate-400"></div>
+
+              <div class="mt-6 space-y-3">
+                <button onclick="copyTable()" class="w-full py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
+                  <svg class="w-4 h-4 fill-current opacity-70 group-hover:opacity-100" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                  <span id="btnCopy">COPY TABLE (FOR PR FORM)</span>
+                </button>
+
+                <button onclick="exportToExcel()" class="w-full py-3.5 rounded-xl bg-[#1d6f42] hover:bg-[#144f2f] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-900/10 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
+                  <svg class="w-4 h-4 fill-current opacity-70 group-hover:opacity-100" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H2.83Q2.5 20.75 2.26 20.5 2 20.26 2 19.92V4.08Q2 3.74 2.26 3.5 2.5 3.25 2.83 3.25ZM11 13V19H20V13ZM4 13V19H9V13ZM11 5V11H20V5ZM4 5V11H9V5Z" /></svg>
+                  <span id="btnExcel">EXPORT TO EXCEL</span>
+                </button>
+              </div>
 
             </div>
           </div>
         </div>
       </div>
-
+    
     </div>
   </div>
 
-  <div class="toast" id="toast">Copied to clipboard ✅</div>
+  <div id="toast" class="fixed left-1/2 bottom-8 -translate-x-1/2 bg-slate-900/90 text-white px-6 py-3 rounded-full text-sm font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 translate-y-4 z-50 backdrop-blur-sm">
+    Copied to clipboard ✅
+  </div>
 
   <input type="hidden" id="outAmountBeforeTaxRaw" value="0">
   <input type="hidden" id="outVATRaw" value="0">
@@ -642,13 +447,24 @@
       });
     }
 
+    /* UPDATED FOR TAILWIND DARK MODE */
     function toggleTheme() {
-      const body = document.body;
-      const isDark = body.getAttribute('data-theme') === 'dark';
-      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
     }
-    if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+    
+    // Init Theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
 
     function getCleanNumber(val) {
       if (!val) return 0;
@@ -673,9 +489,8 @@
       const val = document.getElementById(elementId).value;
       navigator.clipboard.writeText(val).then(() => {
         const t = document.getElementById('toast');
-        t.innerText = "Value Copied! 📋";
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 1500);
+        t.classList.remove('opacity-0', 'translate-y-4'); // Show
+        setTimeout(() => t.classList.add('opacity-0', 'translate-y-4'), 1500); // Hide
       });
     }
 
@@ -703,11 +518,6 @@
       hintEl.innerText = (vendor === 'pkp') ? t.hintTaxableVAT : t.hintTaxableWHT;
     }
 
-    // UPDATED MATRIX:
-    // - PKP + Goods => Remarks show ONLY Tax Base VAT (remove Tax Base WHT)
-    // - PKP + Services or Goods&Services => show VAT + WHT
-    // - NonPKP/Individual + Goods => No Remarks
-    // - NonPKP/Individual + Services or Goods&Services => WHT only
     function updateRemarkVisibility() {
       const vendor = document.getElementById('vendorType').value;
       const invoice = document.getElementById('invoiceType').value;
@@ -726,7 +536,6 @@
 
       if (isPKP) {
         if (invoice === 'goods') {
-          // Tax team revision
           rowVAT.style.display = '';
           rowWHT.style.display = 'none';
         } else {
@@ -752,10 +561,8 @@
       if (vendor === 'non_pkp' || vendor === 'individual') {
         vatSel.value = "0";
         vatSel.disabled = true;
-        vatSel.classList.add('frozen-input');
       } else {
         vatSel.disabled = false;
-        vatSel.classList.remove('frozen-input');
         if (vatSel.value === "0") vatSel.value = "0.11";
       }
       handleVatChange();
@@ -784,14 +591,10 @@
       if (invoice === 'goods') {
         whtSel.value = "none";
         whtSel.disabled = true;
-        whtSel.classList.add('frozen-input');
-
         whtRateIn.value = 0;
         whtRateIn.disabled = true;
-        whtRateIn.classList.add('frozen-input');
       } else {
         whtSel.disabled = false;
-        whtSel.classList.remove('frozen-input');
       }
 
       updateTaxableHint();
@@ -805,46 +608,44 @@
       const hint = document.getElementById('whtRateHint');
       const alertMsg = document.getElementById('whtAlert');
 
+      // Reset alert and styling
+      alertMsg.classList.add('hidden');
+      rateInput.classList.remove('border-rose-500', 'text-rose-500');
+
       if (document.getElementById('whtType').disabled) {
         hint.innerText = "-";
-        alertMsg.style.display = 'none';
         calculate();
         return;
       }
 
       rateInput.disabled = false;
-      rateInput.classList.remove('frozen-input');
-      rateInput.classList.remove('ask-tax-team');
       hint.style.display = 'block';
-      alertMsg.style.display = 'none';
 
       if (type === 'pph23_gen') { rateInput.value = 2; hint.innerText = "Standard: 2%"; }
       else if (type === 'pph23_royalty') { rateInput.value = 15; hint.innerText = "Fixed: 15%"; }
       else if (type === 'pph42_rent') { rateInput.value = 10; hint.innerText = "Final: 10%"; }
       else if (type === 'pph_final_const') {
         rateInput.value = 1.75;
-        rateInput.classList.add('ask-tax-team');
+        rateInput.classList.add('border-rose-500', 'text-rose-500'); // Add styling hook
         hint.style.display = 'none';
-        alertMsg.style.display = 'block';
+        alertMsg.classList.remove('hidden'); // Show alert
         alertMsg.innerText = "⚠️ RATE VARIES! CHECK TAX MATRIX.";
       }
       else if (type === 'pph26') {
         rateInput.value = 20;
-        rateInput.classList.add('ask-tax-team');
+        rateInput.classList.add('border-rose-500', 'text-rose-500');
         hint.style.display = 'none';
-        alertMsg.style.display = 'block';
+        alertMsg.classList.remove('hidden');
         alertMsg.innerText = "⚠️ RATE VARIES! CHECK TAX MATRIX.";
       }
       else if (type === 'pph21_ind') {
         rateInput.value = 0;
         rateInput.disabled = true;
-        rateInput.classList.add('frozen-input');
         hint.innerText = "Progressive (5%-35%) on 50% Base";
       }
       else if (type === 'none') {
         rateInput.value = 0;
         rateInput.disabled = true;
-        rateInput.classList.add('frozen-input');
         hint.innerText = "-";
       }
 
@@ -953,8 +754,8 @@
       const btns = tempDiv.getElementsByTagName('button');
       while (btns.length > 0) { btns[0].parentNode.removeChild(btns[0]); }
 
-      const valContainers = tempDiv.getElementsByClassName('val-container');
-      for (let vc of valContainers) { vc.style.display = 'block'; vc.style.textAlign = 'right'; }
+      // We don't need the val-container class fixes as tailwind structure is different,
+      // but the HTML copied will be basic table structure anyway.
 
       document.body.appendChild(tempDiv);
       const range = document.createRange();
@@ -966,9 +767,8 @@
       document.body.removeChild(tempDiv);
 
       const t = document.getElementById('toast');
-      t.innerText = "Table Copied ✅";
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 1500);
+      t.classList.remove('opacity-0', 'translate-y-4');
+      setTimeout(() => t.classList.add('opacity-0', 'translate-y-4'), 1500);
     }
 
     function exportToExcel() {
@@ -986,9 +786,9 @@
       const remarkVisible = !(isNonPKPOrInd && invoice === 'goods');
 
       const showWHTBaseInRemark =
-        (isPKP && invoice !== 'goods') || (!isPKP && remarkVisible); // PKP+goods => hide WHT base
+        (isPKP && invoice !== 'goods') || (!isPKP && remarkVisible);
       const showVATBaseInRemark =
-        (isPKP) && remarkVisible; // PKP always shows VAT base if remark visible
+        (isPKP) && remarkVisible;
 
       const data = [
         ["Item", "Value"],
